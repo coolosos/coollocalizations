@@ -1,0 +1,62 @@
+{
+    "objects": {
+        "simple": {
+            "type": "string",
+            "dartType": "String"
+        },
+        "multiChoice": {
+            "type": "object",
+            "dartType": "CommonPlural",
+            "description": "A plural remplazable object with other required for safe replacemntes",
+            "properties": {
+                "definition": {
+                    "type": "object",
+                    "properties": {
+                        "other": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "other"
+                    ]
+                },
+                "remplazableKey": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "definition"
+            ]
+        },
+        "multiChoiceReplacements": {
+            "type": "object",
+            "description": "The price of the product",
+            "properties": {
+                "definition": {
+                    "type": "object"
+                },
+                "dateTimeReplacements": {
+                    "description": "if your replacement has one o more date time you can add your {key}: format here for autoformating"
+                }
+            },
+            "required": [
+                "definition"
+            ]
+        },
+        "replacement": {
+            "type": "object",
+            "description": "Contains one or more string/number/date for replacement",
+            "properties": {
+                "value": {
+                    "type": "string"
+                },
+                "dateTimeReplacements": {
+                    "description": "if your replacement has one o more date time you can add your {key}: format here for autoformating"
+                }
+            },
+            "required": [
+                "value"
+            ]
+        }
+    }
+}

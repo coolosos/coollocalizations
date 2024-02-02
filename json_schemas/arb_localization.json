@@ -1,0 +1,35 @@
+{
+    "title": "LocalizationsObject",
+    "description": "Contains all required params for Localization json file",
+    "type": "object",
+    "properties": {
+        "title": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string"
+        },
+        "properties": {
+            "$ref": "#/$defs/properties"
+        }
+    },
+    "required": [
+        "title",
+        "description",
+        "properties",
+        "required"
+    ],
+    "$defs": {
+        "properties": {
+            "type": "object",
+            "properties": {
+                "locale": {
+                    "type": "object"
+                }
+            },
+            "required": [
+                "locale"
+            ]
+        }
+    }
+}
