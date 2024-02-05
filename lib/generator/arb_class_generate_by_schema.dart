@@ -33,16 +33,31 @@ library arb_localization;
 
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:coollocalizations/coollocalizations.dart'
+import 'package:coollocalizations/coollocalizations.dart';
 
+
+part "arb_localization.g.dart";
+
+""";
+
+    final localizationListObject = """
+@JsonSerializable()
+final class ArbLocalizations {
+  const ArbLocalizations({required this.localizations});
+
+  factory ArbLocalizations.fromFile(String file) {
+    return _\$ArbLocalizationsFromJson(json.decode(file));
+  }
+
+  final List<LanguajeLocalization> localizations;
+}
 """;
 
     final classInitializator = """
 @JsonSerializable()
-class ArbLocalizations {
-  const ArbLocalizations({
+class LanguajeLocalization {
+  const LanguajeLocalization({
 """;
     final classRequirements =
         arbObjectsCreation.map((e) => "required this.${e.title}").join(",\n") +
@@ -59,12 +74,13 @@ class ArbLocalizations {
         ";\n";
 
     final creationFunction = """
-factory ArbLocalizations.fromFile(String file) {
-    return _\$ArbLocalizationsFromJson(json.decode(file));
+factory LanguajeLocalization.fromFile(String file) {
+    return _\$LanguajeLocalizationFromJson(json.decode(file));
   }
   """;
     resultFile.writeAsStringSync(
       imports +
+          localizationListObject +
           classInitializator +
           classRequirements +
           classFinals +
