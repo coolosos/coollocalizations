@@ -4,8 +4,6 @@ environment:
 publish_to: none
 
 dependencies:
-  args: ^2.4.2
-  path: ^1.9.0
   json_annotation: 4.8.1
   intl: any
 

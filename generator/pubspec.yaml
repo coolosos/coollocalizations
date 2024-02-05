@@ -1,0 +1,13 @@
+name: coollocalizations_generate
+environment:
+  sdk: ">=3.2.4 <4.0.0"
+publish_to: none
+
+dependencies:
+  args: ^2.4.2
+  path: ^1.9.0
+  intl: any
+
+dev_dependencies:
+  coolint: 1.0.1
+  build_runner: any
