@@ -110,9 +110,11 @@ class ReadJsonAssetFile {
 ```
 
 # How to use
-    -  curl -s https://raw.githubusercontent.com/roysubs/custom_bash/master/custom_loader.sh >tmp.sh
-    -  curl -L https://github.com/yarnpkg/yarn/releases/download/v0.23.4/ya‌​rn-v0.23.4.tar.gz > yarn.tar.gz
     -  curl -L \
   -H "Accept: application/vnd.github+json" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/OWNER/REPO/releases/assets/ASSET_ID
+  https://github.com/coolosos/coollocalizations/releases/download/0.0.2/arb_creation
+
+### Compilation
+
+- dart compile exe main.dart -o arb_merges   
