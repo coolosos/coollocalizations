@@ -117,4 +117,4 @@ class ReadJsonAssetFile {
 
 ### Compilation
 
-- dart compile exe main.dart -o arb_merges   
+- dart compile exe main.dart -o arb_creation 
