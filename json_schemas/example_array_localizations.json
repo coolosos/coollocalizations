@@ -1,0 +1,17 @@
+{
+    "title": "LocalizationsArray",
+    "description": "Localizations array with all available languajes",
+    "type": "object",
+    "properties": {
+        "localizations": {
+            "type": "array",
+            "items": {
+                "$ref": "example_json_localization.json"
+            },
+            "minItems": 1
+        }
+    },
+    "required": [
+        "localizations"
+    ]
+}

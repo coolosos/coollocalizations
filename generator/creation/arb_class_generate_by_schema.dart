@@ -35,7 +35,7 @@ final class ArbClassGenerateBySchema with PrinterHelper {
     final generateCodeExplanation = """
 /// GENERATED CODE - DO NOT MODIFY BY HAND
 /// *****************************************************
-///  FlutterGen
+///  Cool Localization
 /// *****************************************************
 
 // coverage:ignore-file

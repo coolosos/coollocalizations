@@ -16,7 +16,7 @@ class MergeSchemasArguments {
       mandatory: true,
     )
     ..addOption(
-      allLocalizations,
+      mergeLocalizations,
       abbr: 'm',
       aliases: ["merge"],
       help: 'Merge localizations file',

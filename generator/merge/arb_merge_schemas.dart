@@ -31,10 +31,13 @@ final class ArbMergeSchemas with PrinterHelper {
         mergeJson['localizations'] != null) {
       print("Localizations find, proceded to change internal localizations"
           .colorizeMessage(PrinterStringColor.magenta, emoji: "🔛"));
-      final iterableAll =
-          (allJson['localizations'] as Iterable<Map<String, dynamic>>).toList();
-      final iterableMerge =
-          (allJson['localizations'] as Iterable<Map<String, dynamic>>).toList();
+
+      final iterableAll = (allJson['localizations'] as List)
+          .whereType<Map<String, dynamic>>()
+          .toList();
+      final iterableMerge = (mergeJson['localizations'] as List)
+          .whereType<Map<String, dynamic>>()
+          .toList();
 
       for (int i = 0; i < iterableMerge.length; i++) {
         final mergeInternal = iterableMerge[i];
@@ -46,12 +49,19 @@ final class ArbMergeSchemas with PrinterHelper {
         if (internalAll != null) {
           iterableAll.removeWhere((element) => element == internalAll);
           for (var merges in mergeInternal.entries) {
+            print(merges);
             internalAll.update(
               merges.key,
               (value) => merges.value,
-              ifAbsent: () => internalAll.addAll({merges.key: merges.value}),
+              ifAbsent: () {
+                print(
+                    "Added ${merges.key} with value ${merges.value}. This key doesn't exist in the previous json"
+                        .colorizeMessage(PrinterStringColor.red, emoji: "🚨"));
+                internalAll.addEntries([merges]);
+              },
             );
           }
+          print(internalAll);
           iterableAll.add(internalAll);
         }
       }
