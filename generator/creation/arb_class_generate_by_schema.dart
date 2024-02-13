@@ -59,18 +59,11 @@ part "arb_localization.g.dart";
 """;
 
     final localizationListObject = """
-@JsonSerializable()
-final class ArbLocalizations {
+abstract interface class ArbLocalizations {
   const ArbLocalizations({required this.localizations});
-
-  factory ArbLocalizations.fromFile(String file) {
-    return _\$ArbLocalizationsFromJson(json.decode(file));
-  }
 
   final List<LanguajeLocalization> localizations;
 }
-
-
 """;
 
     final classInitializator = """
@@ -93,7 +86,7 @@ class LanguajeLocalization {
         ";\n";
 
     final creationFunction = """
-factory LanguajeLocalization.fromFile(String file) {
+factory LanguajeLocalization.FromJson(String file) {
     return _\$LanguajeLocalizationFromJson(json.decode(file));
   }
   """;
