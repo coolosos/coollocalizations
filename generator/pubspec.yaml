@@ -9,5 +9,5 @@ dependencies:
   intl: any
 
 dev_dependencies:
-  coolint: 1.0.1
+  coolint: 2.0.0
   build_runner: any

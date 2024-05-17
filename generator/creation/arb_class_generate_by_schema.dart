@@ -86,8 +86,9 @@ class LanguajeLocalization {
         ";\n";
 
     final creationFunction = """
-factory LanguajeLocalization.fromJson(String file) {
-    return _\$LanguajeLocalizationFromJson(json.decode(file));
+
+factory LanguajeLocalization.fromJson(Map<String, dynamic> json) {
+    return _\$LanguajeLocalizationFromJson(json);
   }
   """;
 
