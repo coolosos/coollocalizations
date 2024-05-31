@@ -8,7 +8,7 @@ The json base will be something like this:
 {
   "$schema": "https://raw.githubusercontent.com/coolosos/coollocalizations/main/json_schemas/arb_localization.json",
   "title": "Localization",
-  "description": "Localization finetwork schema",
+  "description": "Localization Coolosos schema",
   "type": "object",
   "properties": {
     "locale": {
@@ -28,7 +28,7 @@ After execution the json will be like:
 {
   "$schema": "https://raw.githubusercontent.com/coolosos/coollocalizations/main/json_schemas/arb_localization.json",
   "title": "Localization",
-  "description": "Localization finetwork schema",
+  "description": "Localization Coolosos schema",
   "type": "object",
   "properties": {
     "locale": {
@@ -58,11 +58,11 @@ final class ArbLocalizations {
     return _$ArbLocalizationsFromJson(json.decode(file));
   }
 
-  final List<LanguajeLocalization> localizations;
+  final List<LanguageLocalization> localizations;
 }
 @JsonSerializable()
-class LanguajeLocalization {
-  const LanguajeLocalization(
+class LanguageLocalization {
+  const LanguageLocalization(
       {required this.locale,
       required this.hello_world,
       required this.remplazable_object,});

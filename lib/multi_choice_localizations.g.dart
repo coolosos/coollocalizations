@@ -10,12 +10,12 @@ MultiChoiceLocalizations _$MultiChoiceLocalizationsFromJson(
         Map<String, dynamic> json) =>
     MultiChoiceLocalizations(
       definition: json['definition'] as Map<String, dynamic>,
-      remplazableKey: json['remplazableKey'] as String?,
+      replaceKey: json['replaceKey'] as String?,
     );
 
 Map<String, dynamic> _$MultiChoiceLocalizationsToJson(
         MultiChoiceLocalizations instance) =>
     <String, dynamic>{
       'definition': instance.definition,
-      'remplazableKey': instance.remplazableKey,
+      'replaceKey': instance.replaceKey,
     };

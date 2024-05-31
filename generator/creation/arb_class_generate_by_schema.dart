@@ -51,8 +51,6 @@ library arb_localization;
 import 'dart:convert';
 
 import 'package:json_annotation/json_annotation.dart';
-import 'package:coollocalizations/coollocalizations.dart';
-
 
 part "arb_localization.g.dart";
 
@@ -62,14 +60,14 @@ part "arb_localization.g.dart";
 abstract interface class ArbLocalizations {
   const ArbLocalizations({required this.localizations});
 
-  final List<LanguajeLocalization> localizations;
+  final List<LanguageLocalization> localizations;
 }
 """;
 
-    final classInitializator = """
+    final classInitialization = """
 @JsonSerializable()
-class LanguajeLocalization {
-  const LanguajeLocalization({
+class LanguageLocalization {
+  const LanguageLocalization({
 """;
     final classRequirements =
         arbObjectsCreation.map((e) => "required this.${e.title}").join(",\n") +
@@ -87,8 +85,8 @@ class LanguajeLocalization {
 
     final creationFunction = """
 
-factory LanguajeLocalization.fromJson(Map<String, dynamic> json) {
-    return _\$LanguajeLocalizationFromJson(json);
+factory LanguageLocalization.fromJson(Map<String, dynamic> json) {
+    return _\$LanguageLocalizationFromJson(json);
   }
   """;
 
@@ -96,7 +94,7 @@ factory LanguajeLocalization.fromJson(Map<String, dynamic> json) {
       generateCodeExplanation +
           imports +
           localizationListObject +
-          classInitializator +
+          classInitialization +
           classRequirements +
           classFinals +
           creationFunction +

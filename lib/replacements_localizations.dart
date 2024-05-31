@@ -15,9 +15,9 @@ class ReplacementsLocalizations {
   final Map<String, String>? dateTimeReplacements;
 
   String run(
-    Map<String, dynamic> subtituionWords,
+    Map<String, dynamic> substitutesWords,
   ) {
     return value
-        .substitute(subtituionWords.formatDateTime(dateTimeReplacements));
+        .substitute(substitutesWords.formatDateTime(dateTimeReplacements));
   }
 }

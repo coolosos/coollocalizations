@@ -7,18 +7,18 @@ part "multi_choice_localizations.g.dart";
 class MultiChoiceLocalizations {
   const MultiChoiceLocalizations({
     required this.definition,
-    required this.remplazableKey,
+    required this.replaceKey,
   });
 
   factory MultiChoiceLocalizations.fromJson(Map<String, dynamic> json) =>
       _$MultiChoiceLocalizationsFromJson(json);
 
   final Map<String, dynamic> definition;
-  final String? remplazableKey;
+  final String? replaceKey;
 
   String getPlural({required String data}) {
     return (definition[data] ?? '')
         .toString()
-        .substitute({(remplazableKey ?? ''): data});
+        .substitute({(replaceKey ?? ''): data});
   }
 }

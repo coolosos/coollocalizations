@@ -20,10 +20,10 @@ class MultiChoiceReplacementsLocalizations {
 
   String getPlural({
     required String data,
-    required Map<String, String> subtitions,
+    required Map<String, String> substitutes,
   }) {
     return (definition[data] ?? '')
         .toString()
-        .substitute(subtitions.formatDateTime(dateTimeReplacements));
+        .substitute(substitutes.formatDateTime(dateTimeReplacements));
   }
 }
