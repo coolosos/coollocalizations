@@ -35,7 +35,7 @@ Result json will be:
     "$schema": "schemas/array_localizations.json",
     "localizations": [
         {
-            "$schema": "languaje_localizations.json",
+            "$schema": "language_localizations.json",
             "locale": "es",
             "hello_world": "Hello word",
             "flavour_name": "Mithos 5r Flavour",
