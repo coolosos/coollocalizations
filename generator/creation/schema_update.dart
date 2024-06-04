@@ -35,7 +35,16 @@ final class SchemaUpdater {
     return schemaFile.copy(newCopyLocation + "localization_schema.json");
   }
 
-  Future<void> createMergeSchema({required String path}) {
-    return schemaFile.copy('merge_schema.json');
+  Future<File> createMergeSchema({required String path}) async {
+    final String schemaString = await schemaFile.readAsString();
+    final Map<String, dynamic> schemaJson = json.decode(schemaString);
+
+    schemaJson["required"] = [];
+
+    var encoder = const JsonEncoder.withIndent("  ");
+
+    schemaFile.writeAsStringSync(encoder.convert(schemaJson));
+
+    return schemaFile.copy(path);
   }
 }
