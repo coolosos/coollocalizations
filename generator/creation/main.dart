@@ -35,8 +35,12 @@ Future<void> main(List<String> arguments) async {
 
   arbGenerator.run();
 
-  final schemaUpdater = SchemaUpdater(schemaFile: schemaFile)
-    ..updateRequirements();
+  final schemaUpdater = SchemaUpdater(schemaFile: schemaFile);
+
+  schemaUpdater.createMergeSchema(
+      path: result[ArbArguments.modificationSchemaLocation]);
+
+  schemaUpdater.updateRequirements();
 
   final String? newSchemaLocation = result[ArbArguments.copySchemaLocation];
   if (!(newSchemaLocation == null || newSchemaLocation.isEmpty)) {
