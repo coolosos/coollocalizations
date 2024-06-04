@@ -9,7 +9,6 @@ final class SchemaUpdater {
   final File schemaFile;
 
   Future<void> updateRequirements() async {
-    await createMergeSchema();
     final String schemaString = await schemaFile.readAsString();
     final Map<String, dynamic> schemaJson = json.decode(schemaString);
     final Map<String, dynamic> schemaProperties = schemaJson["properties"];
@@ -36,7 +35,7 @@ final class SchemaUpdater {
     return schemaFile.copy(newCopyLocation + "localization_schema.json");
   }
 
-  Future<void> createMergeSchema() {
+  Future<void> createMergeSchema({required String path}) {
     return schemaFile.copy('merge_schema.json');
   }
 }
