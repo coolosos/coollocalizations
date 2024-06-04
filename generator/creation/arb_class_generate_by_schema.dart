@@ -48,8 +48,6 @@ final class ArbClassGenerateBySchema with PrinterHelper {
 
 library arb_localization;
 
-import 'dart:convert';
-
 import 'package:json_annotation/json_annotation.dart';
 
 part "arb_localization.g.dart";
