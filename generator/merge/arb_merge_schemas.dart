@@ -27,6 +27,10 @@ final class ArbMergeSchemas with PrinterHelper {
     final merge = await mergeLocalizations.readAsString();
     final Map<String, dynamic> mergeJson = json.decode(merge);
 
+    if (mergeJson['checkSchema'] != null) {
+      allJson['\$schema'] = mergeJson['checkSchema'];
+    }
+
     if (allJson['localizations'] != null &&
         mergeJson['localizations'] != null) {
       _replaceByLocalizationListSchema(allJson, mergeJson);
@@ -41,8 +45,9 @@ final class ArbMergeSchemas with PrinterHelper {
         .colorizeMessage(PrinterStringColor.green, emoji: "✨"));
   }
 
-  void _replaceByMatchKeys(Map<String, dynamic> mergeJson, Map<String, dynamic> allJson) {
-     print("No Localizations find, proceeded to change match keys"
+  void _replaceByMatchKeys(
+      Map<String, dynamic> mergeJson, Map<String, dynamic> allJson) {
+    print("No Localizations find, proceeded to change match keys"
         .colorizeMessage(PrinterStringColor.magenta, emoji: "🔛"));
     for (var merges in mergeJson.entries) {
       allJson.update(
@@ -53,43 +58,48 @@ final class ArbMergeSchemas with PrinterHelper {
     }
   }
 
-  void _replaceByLocalizationListSchema(Map<String, dynamic> allJson, Map<String, dynamic> mergeJson) {
+  void _replaceByLocalizationListSchema(
+      Map<String, dynamic> allJson, Map<String, dynamic> mergeJson) {
     print("Localizations find, proceeded to change internal localizations"
         .colorizeMessage(PrinterStringColor.magenta, emoji: "🔛"));
-    
+
     final allLocalizations = (allJson['localizations'] as List)
         .whereType<Map<String, dynamic>>()
         .toList();
     final mergeLocalizations = (mergeJson['localizations'] as List)
         .whereType<Map<String, dynamic>>()
         .toList();
-    
+
     for (int i = 0; i < mergeLocalizations.length; i++) {
       final mergeInternal = mergeLocalizations[i];
       final internalLocale = mergeInternal['locale'];
-    
+
       final internalLocalizationWithAllLocalizations = allLocalizations
           .firstWhereOrNull((element) => element['locale'] == internalLocale);
 
       if (internalLocalizationWithAllLocalizations != null) {
         //In all localizations exist the merge language
-        _deleteAndUpdateInternalLocalization(allLocalizations, internalLocalizationWithAllLocalizations, mergeInternal);
+        _deleteAndUpdateInternalLocalization(allLocalizations,
+            internalLocalizationWithAllLocalizations, mergeInternal);
         allLocalizations.add(internalLocalizationWithAllLocalizations);
       }
     }
   }
 
   ///Delete localization for father localizations and added again with the merge updates
-  void _deleteAndUpdateInternalLocalization(List<Map<String, dynamic>> allLocalizations, Map<String, dynamic> internalLocalizationWithAllLocalizations, Map<String, dynamic> mergeInternal) {
-    allLocalizations.removeWhere((element) => element == internalLocalizationWithAllLocalizations);
+  void _deleteAndUpdateInternalLocalization(
+      List<Map<String, dynamic>> allLocalizations,
+      Map<String, dynamic> internalLocalizationWithAllLocalizations,
+      Map<String, dynamic> mergeInternal) {
+    allLocalizations.removeWhere(
+        (element) => element == internalLocalizationWithAllLocalizations);
     for (var merges in mergeInternal.entries) {
       print(merges);
       internalLocalizationWithAllLocalizations.update(
         merges.key,
         (value) {
-           print(
-              "Update {${merges.key}:${merges.value}.}"
-                  .colorizeMessage(PrinterStringColor.green, emoji: "✅"));
+          print("Update {${merges.key}:${merges.value}.}"
+              .colorizeMessage(PrinterStringColor.green, emoji: "✅"));
           return merges.value;
         },
         ifAbsent: () {
