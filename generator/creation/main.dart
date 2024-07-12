@@ -37,10 +37,10 @@ Future<void> main(List<String> arguments) async {
 
   final schemaUpdater = SchemaUpdater(schemaFile: schemaFile);
 
-  schemaUpdater.createMergeSchema(
+  await schemaUpdater.createMergeSchema(
       path: result[ArbArguments.modificationSchemaLocation]);
 
-  schemaUpdater.updateRequirements();
+  await schemaUpdater.updateRequirements();
 
   final String? newSchemaLocation = result[ArbArguments.copySchemaLocation];
   if (!(newSchemaLocation == null || newSchemaLocation.isEmpty)) {

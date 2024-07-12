@@ -49,6 +49,7 @@ final class ArbClassGenerateBySchema with PrinterHelper {
 library arb_localization;
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:coollocalizations/coollocalizations.dart';
 
 part "arb_localization.g.dart";
 
