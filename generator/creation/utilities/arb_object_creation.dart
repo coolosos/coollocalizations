@@ -6,11 +6,11 @@ enum ArbObjectType {
   ;
 
   static ArbObjectType fromString(String preType) {
-    if (preType.contains("multiChoice")) {
-      return multiChoice;
-    }
     if (preType.contains("multiChoiceReplacements")) {
       return multiChoiceReplacements;
+    }
+    if (preType.contains("multiChoice")) {
+      return multiChoice;
     }
     if (preType.contains("replacement")) {
       return replacements;
