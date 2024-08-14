@@ -20,30 +20,37 @@ extension ReplaceInternalization on String {
   }
 }
 
-extension SubtitionFormatDateTime on Map<String, dynamic> {
+extension substitutionFormatDateTime on Map<String, dynamic> {
   Map<String, String> formatDateTime(
-      Map<String, String>? dateTimeReplacements) {
-    final List<_DateTimeReplacements> dateTimesSubtituion = [];
-    final iterableSubtituions = Map.from(this);
-    for (var element in iterableSubtituions.entries) {
+    Map<String, String>? dateTimeReplacements, {
+    required String? locale,
+  }) {
+    final List<_DateTimeReplacements> dateTimesSubstitution = [];
+    final iterableSubstitutions = Map.from(this);
+    for (var element in iterableSubstitutions.entries) {
       final String? dateFormat = dateTimeReplacements?[element.key];
       if (element.value is DateTime && dateFormat != null) {
-        dateTimesSubtituion.add(_DateTimeReplacements(
-            key: element.key, time: element.value, format: dateFormat));
+        dateTimesSubstitution.add(
+          _DateTimeReplacements(
+            key: element.key,
+            time: element.value,
+            format: dateFormat,
+            locale: locale,
+          ),
+        );
         this.remove(element.key);
       }
     }
     final Iterable<Map<String, String>> transformations =
-        dateTimesSubtituion.map((e) => e.transform());
+        dateTimesSubstitution.map((e) => e.transform());
     final Map<String, String> dateTimeTransformations = {};
     for (Map<String, String> element in transformations) {
       dateTimeTransformations.addAll(element);
     }
-    final Map<String, String> subtitions = {
+    return {
       ...this,
-      ...dateTimeTransformations
+      ...dateTimeTransformations,
     };
-    return subtitions;
   }
 }
 

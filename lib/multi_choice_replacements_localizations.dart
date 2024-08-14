@@ -12,9 +12,13 @@ class MultiChoiceReplacementsLocalizations {
 
   factory MultiChoiceReplacementsLocalizations.fromJson(
     Map<String, dynamic> json,
-  ) =>
-      _$MultiChoiceReplacementsLocalizationsFromJson(json);
-
+  ) {
+    final object = _$MultiChoiceReplacementsLocalizationsFromJson(json);
+    return MultiChoiceReplacementsLocalizations(
+      definition: object.definition,
+      dateTimeReplacements: object.dateTimeReplacements,
+    );
+  }
   final Map<String, dynamic> definition;
   final Map<String, String>? dateTimeReplacements;
 
