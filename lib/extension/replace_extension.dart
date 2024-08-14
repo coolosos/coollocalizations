@@ -51,12 +51,17 @@ final class _DateTimeReplacements {
   final String key;
   final DateTime time;
   final String format;
+  final String? locale;
 
-  const _DateTimeReplacements(
-      {required this.key, required this.time, required this.format});
+  const _DateTimeReplacements({
+    required this.key,
+    required this.time,
+    required this.format,
+    required this.locale,
+  });
 
   Map<String, String> transform() {
-    final fDateTime = DateFormat(format);
+    final fDateTime = DateFormat(format, locale);
     return {key: fDateTime.format(time)};
   }
 }

@@ -15,9 +15,12 @@ class ReplacementsLocalizations {
   final Map<String, String>? dateTimeReplacements;
 
   String run(
-    Map<String, dynamic> substitutesWords,
-  ) {
-    return value
-        .substitute(substitutesWords.formatDateTime(dateTimeReplacements));
+    Map<String, dynamic> substitutesWords, {
+    required String? locale,
+  }) {
+    return value.substitute(substitutesWords.formatDateTime(
+      dateTimeReplacements,
+      locale: locale,
+    ));
   }
 }
