@@ -1,19 +1,17 @@
 import 'package:intl/intl.dart';
 
 extension ReplaceInternalization on String {
-  String substitute(Map<String, String> bannedWords) {
+  String substitute(Map<String, String> substitutionMap) {
     RegExp regexSubstituteWords = RegExp(
-      "(${bannedWords.keys.join("|")})",
+      "(${substitutionMap.keys.join("|")})",
       caseSensitive: false,
     );
 
     return replaceAllMapped(
       regexSubstituteWords,
       (match) {
-        final newWorld = bannedWords[match[0]];
-        if (newWorld is String && match.input.contains(newWorld)) {
-          return '';
-        }
+        final newWorld = substitutionMap[match[0]];
+
         return newWorld ?? '';
       },
     );
