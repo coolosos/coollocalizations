@@ -12,10 +12,8 @@ class ReplacementsLocalizations {
 
   factory ReplacementsLocalizations.fromJson(
     Map<String, dynamic> json,
-  ) {
-    final fromJsonReplacement = _$ReplacementsLocalizationsFromJson(json);
-    return fromJsonReplacement;
-  }
+  ) =>
+      _$ReplacementsLocalizationsFromJson(json);
 
   final String value;
   final Map<String, String>? dateTimeReplacements;
