@@ -24,14 +24,14 @@ class MultiChoiceReplacementsLocalizations {
 
   String getPlural({
     required String data,
-    required Map<String, String> substitutes,
+    required Map<String, dynamic> substitutes,
     required String? locale,
   }) {
-    return (definition[data] ?? '')
-        .toString()
-        .substitute(substitutes.formatDateTime(
-          dateTimeReplacements,
-          locale: locale,
-        ));
+    return (definition[data] ?? '').toString().substitute(
+          substitutes.formatDateTime(
+            dateTimeReplacements,
+            locale: locale,
+          ),
+        );
   }
 }
