@@ -13,11 +13,8 @@ class ReplacementsLocalizations {
   factory ReplacementsLocalizations.fromJson(
     Map<String, dynamic> json,
   ) {
-    final object = _$ReplacementsLocalizationsFromJson(json);
-    return ReplacementsLocalizations(
-      value: object.value,
-      dateTimeReplacements: object.dateTimeReplacements,
-    );
+    final fromJsonReplacement = _$ReplacementsLocalizationsFromJson(json);
+    return fromJsonReplacement;
   }
 
   final String value;
