@@ -12,26 +12,22 @@ class MultiChoiceReplacementsLocalizations {
 
   factory MultiChoiceReplacementsLocalizations.fromJson(
     Map<String, dynamic> json,
-  ) {
-    final object = _$MultiChoiceReplacementsLocalizationsFromJson(json);
-    return MultiChoiceReplacementsLocalizations(
-      definition: object.definition,
-      dateTimeReplacements: object.dateTimeReplacements,
-    );
-  }
+  ) =>
+      _$MultiChoiceReplacementsLocalizationsFromJson(json);
+
   final Map<String, dynamic> definition;
   final Map<String, String>? dateTimeReplacements;
 
   String getPlural({
     required String data,
-    required Map<String, String> substitutes,
+    required Map<String, dynamic> substitutes,
     required String? locale,
   }) {
-    return (definition[data] ?? '')
-        .toString()
-        .substitute(substitutes.formatDateTime(
-          dateTimeReplacements,
-          locale: locale,
-        ));
+    return (definition[data] ?? '').toString().substitute(
+          substitutes.formatDateTime(
+            dateTimeReplacements,
+            locale: locale,
+          ),
+        );
   }
 }

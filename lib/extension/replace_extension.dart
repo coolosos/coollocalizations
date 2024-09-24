@@ -18,7 +18,7 @@ extension ReplaceInternalization on String {
   }
 }
 
-extension substitutionFormatDateTime on Map<String, dynamic> {
+extension SubstitutionFormatDateTime on Map<String, dynamic> {
   Map<String, String> formatDateTime(
     Map<String, String>? dateTimeReplacements, {
     required String? locale,
