@@ -31,9 +31,18 @@ Future<void> main(List<String> arguments) async {
   final arbGenerator = ArbClassGenerateBySchema(
     schemaFile: schemaFile,
     resultFile: File("$className.dart"),
+    isForMerge: false,
   );
 
   arbGenerator.run();
+
+  final arbRemoteGenerator = ArbClassGenerateBySchema(
+    schemaFile: schemaFile,
+    resultFile: File("${className}_merge.dart"),
+    isForMerge: true,
+  );
+
+  arbRemoteGenerator.run();
 
   final schemaUpdater = SchemaUpdater(schemaFile: schemaFile);
 
