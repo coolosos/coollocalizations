@@ -23,7 +23,12 @@ class MultiChoiceReplacementsLocalizations {
     required Map<String, dynamic> substitutes,
     required String? locale,
   }) {
-    return (definition[data] ?? '').toString().substitute(
+    return (definition[data] ??
+            definition['other'] ??
+            definition['default'] ??
+            '')
+        .toString()
+        .substitute(
           substitutes.formatDateTime(
             dateTimeReplacements,
             locale: locale,
