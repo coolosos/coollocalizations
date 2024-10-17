@@ -33,7 +33,15 @@
             "description": "The price of the product",
             "properties": {
                 "definition": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                        "other": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "other"
+                    ]
                 },
                 "dateTimeReplacements": {
                     "description": "if your replacement has one o more date time you can add your {key}: format here for autoformating"
