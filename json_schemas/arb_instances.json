@@ -4,6 +4,13 @@
             "type": "string",
             "dartType": "String"
         },
+        "simpleList": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "string"
+            }
+        },
         "multiChoice": {
             "type": "object",
             "dartType": "CommonPlural",
@@ -57,6 +64,25 @@
             "properties": {
                 "value": {
                     "type": "string"
+                },
+                "dateTimeReplacements": {
+                    "description": "if your replacement has one o more date time you can add your {key}: format here for autoformating"
+                }
+            },
+            "required": [
+                "value"
+            ]
+        },
+        "replacementList": {
+            "type": "object",
+            "description": "Contains a list with one or more string/number/date for replacement",
+            "properties": {
+                "value": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "dateTimeReplacements": {
                     "description": "if your replacement has one o more date time you can add your {key}: format here for autoformating"

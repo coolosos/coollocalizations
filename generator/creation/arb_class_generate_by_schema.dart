@@ -17,8 +17,10 @@ final class ArbClassGenerateBySchema with PrinterHelper {
 
   Future<void> run() async {
     title("Cool Localizations Generator");
-    print("Reading json schema"
-        .colorizeMessage(PrinterStringColor.yellow, emoji: "🔛"));
+    print(
+      "Reading json schema"
+          .colorizeMessage(PrinterStringColor.yellow, emoji: "🔛"),
+    );
     final String schemaString = await schemaFile.readAsString();
     final Map<String, dynamic> schemaJson = json.decode(schemaString);
     final Map<String, dynamic> schemaProperties = schemaJson["properties"];
@@ -32,9 +34,10 @@ final class ArbClassGenerateBySchema with PrinterHelper {
         ),
       );
     }
-    print("Generate code"
-        .colorizeMessage(PrinterStringColor.yellow, emoji: "🔛"));
-    final generateCodeExplanation = """
+    print(
+      "Generate code".colorizeMessage(PrinterStringColor.yellow, emoji: "🔛"),
+    );
+    const generateCodeExplanation = """
 /// GENERATED CODE - DO NOT MODIFY BY HAND
 /// *****************************************************
 ///  Cool Localization
@@ -84,18 +87,18 @@ class $arbLanguageLocalizationsClassName {
   const $arbLanguageLocalizationsClassName({
 """;
     final classRequirements =
-        arbObjectsCreation.map((e) => "required this.${e.title}").join(",\n") +
-            "});";
-    final classFinals = arbObjectsCreation
-            .map((e) => "final ${e.type.resolve(
-                  onSimple: () => "String",
-                  onMultiChoice: () => "MultiChoiceLocalizations",
-                  onMultiChoiceReplacements: () =>
-                      "MultiChoiceReplacementsLocalizations",
-                  onReplacements: () => "ReplacementsLocalizations",
-                )}${isForMerge ? "?" : ""} ${e.title}")
-            .join(";\n") +
-        ";\n";
+        "${arbObjectsCreation.map((e) => "required this.${e.title}").join(",\n")}});";
+    final classFinals = "${arbObjectsCreation.map(
+          (e) => "final ${e.type.resolve(
+            onSimple: () => "String",
+            onMultiChoice: () => "MultiChoiceLocalizations",
+            onMultiChoiceReplacements: () =>
+                "MultiChoiceReplacementsLocalizations",
+            onReplacements: () => "ReplacementsLocalizations",
+            onReplacementsList: () => 'ReplacementsListLocalizations',
+            onList: () => 'List<String>',
+          )}${isForMerge ? "?" : ""} ${e.title}",
+        ).join(";\n")};\n";
 
     final creationFunction = """
 
@@ -109,7 +112,7 @@ factory $arbLanguageLocalizationsClassName.fromJson(Map<String, dynamic> json) {
         : """
 
 $arbLanguageLocalizationsClassName updateFromMerge(${arbLanguageLocalizationsClassName}Merge merge){
-  return ${arbLanguageLocalizationsClassName}(
+  return $arbLanguageLocalizationsClassName(
       ${arbObjectsCreation.map((e) => "${e.title} : merge.${e.title} ?? ${e.title}").join(",\n")}
   );
 }
@@ -117,19 +120,11 @@ $arbLanguageLocalizationsClassName updateFromMerge(${arbLanguageLocalizationsCla
 """;
 
     resultFile.writeAsStringSync(
-      generateCodeExplanation +
-          imports +
-          localizationListObject +
-          classInitialization +
-          classRequirements +
-          classFinals +
-          creationFunction +
-          fromMergeLocalizations +
-          "\n" +
-          "}",
+      "$generateCodeExplanation$imports$localizationListObject$classInitialization$classRequirements$classFinals$creationFunction$fromMergeLocalizations\n}",
     );
 
     print(
-        "Code Generated".colorizeMessage(PrinterStringColor.green, emoji: "✨"));
+      "Code Generated".colorizeMessage(PrinterStringColor.green, emoji: "✨"),
+    );
   }
 }
