@@ -14,6 +14,10 @@ class MultiChoiceLocalizations {
   final Map<String, dynamic> definition;
 
   String getPlural({required String data}) {
-    return (definition[data] ?? definition['other'] ?? definition['default'] ??  '').toString();
+    return (definition[data] ??
+            definition['other'] ??
+            definition['default'] ??
+            '')
+        .toString();
   }
 }
