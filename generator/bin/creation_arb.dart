@@ -1,12 +1,12 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:coollocalizations_generate/creation/arb_arguments.dart';
+import 'package:coollocalizations_generate/creation/arb_class_generate_by_schema.dart';
+import 'package:coollocalizations_generate/creation/schema_update.dart';
 
-import 'arb_arguments.dart';
 import 'package:path/path.dart' as path;
-
-import 'arb_class_generate_by_schema.dart';
-import 'schema_update.dart';
 
 Future<void> main(List<String> arguments) async {
   final ArgParser parser = ArbArguments().parser;
@@ -26,6 +26,8 @@ Future<void> main(List<String> arguments) async {
     ),
   );
 
+  final List<Future> generatorAwaitList = [];
+
   final String className = result[ArbArguments.nameKey];
 
   final arbGenerator = ArbClassGenerateBySchema(
@@ -34,7 +36,7 @@ Future<void> main(List<String> arguments) async {
     isForMerge: false,
   );
 
-  arbGenerator.run();
+  generatorAwaitList.add(arbGenerator.run());
 
   final arbRemoteGenerator = ArbClassGenerateBySchema(
     schemaFile: schemaFile,
@@ -42,17 +44,24 @@ Future<void> main(List<String> arguments) async {
     isForMerge: true,
   );
 
-  arbRemoteGenerator.run();
+  generatorAwaitList.add(arbRemoteGenerator.run());
 
   final schemaUpdater = SchemaUpdater(schemaFile: schemaFile);
 
   await schemaUpdater.createMergeSchema(
-      path: result[ArbArguments.modificationSchemaLocation]);
+    path: result[ArbArguments.modificationSchemaLocation],
+  );
 
   await schemaUpdater.updateRequirements();
 
   final String? newSchemaLocation = result[ArbArguments.copySchemaLocation];
   if (!(newSchemaLocation == null || newSchemaLocation.isEmpty)) {
-    schemaUpdater.copySchemaOnLocation(copyLocation: newSchemaLocation);
+    generatorAwaitList.add(
+      schemaUpdater.copySchemaOnLocation(copyLocation: newSchemaLocation),
+    );
   }
+
+  await Future.wait(generatorAwaitList);
+
+  exit(1);
 }
