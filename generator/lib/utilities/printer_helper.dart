@@ -1,7 +1,7 @@
 import 'extension.dart';
 export 'extension.dart';
 
-mixin PrinterHelper {
+mixin class PrinterHelper {
   void title(String title) {
     print(title
         .toUpperCase()

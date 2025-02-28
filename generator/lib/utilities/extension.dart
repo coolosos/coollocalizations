@@ -1,5 +1,5 @@
 extension Formatter on String {
-  colorizeMessage(
+  String colorizeMessage(
     PrinterStringColor color, {
     required String emoji,
   }) =>
