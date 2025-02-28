@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:coollocalizations_generate/merge/arb_merge_schemas.dart';
-import 'package:coollocalizations_generate/merge/merge_schema_arguments.dart';
+import 'package:coollocalizations_generator/merge/arb_merge_schemas.dart';
+import 'package:coollocalizations_generator/merge/merge_schema_arguments.dart';
 
 import 'package:path/path.dart' as path;
 

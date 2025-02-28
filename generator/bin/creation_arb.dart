@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:coollocalizations_generate/creation/arb_arguments.dart';
-import 'package:coollocalizations_generate/creation/arb_class_generate_by_schema.dart';
-import 'package:coollocalizations_generate/creation/schema_update.dart';
+import 'package:coollocalizations_generator/creation/arb_arguments.dart';
+import 'package:coollocalizations_generator/creation/arb_class_generate_by_schema.dart';
+import 'package:coollocalizations_generator/creation/schema_update.dart';
 
 import 'package:path/path.dart' as path;
 
