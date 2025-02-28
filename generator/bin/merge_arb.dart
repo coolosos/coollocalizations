@@ -42,5 +42,5 @@ Future<void> main(List<String> arguments) async {
 
   await arbMergeSchemas.run();
 
-  exit(1);
+  exit(0);
 }

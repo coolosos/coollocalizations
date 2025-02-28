@@ -63,5 +63,5 @@ Future<void> main(List<String> arguments) async {
 
   await Future.wait(generatorAwaitList);
 
-  exit(1);
+  exit(0);
 }
