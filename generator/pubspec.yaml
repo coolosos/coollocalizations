@@ -7,6 +7,7 @@ dependencies:
   args: ^2.4.2
   path: ^1.9.0
   intl: any
+  build: ^2.4.2
 
 dev_dependencies:
   coolint: 2.0.0
