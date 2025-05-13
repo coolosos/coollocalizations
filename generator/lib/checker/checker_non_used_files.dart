@@ -25,7 +25,9 @@ final class CheckerNonUsedFiles extends PrinterHelper with DirectoryManagement {
     );
     final String all = await schemaFile.readAsString();
     final Map<String, dynamic> allJson = json.decode(all);
-    final schemaKeys = allJson.keys.toSet()
+    final schemaKeys = (allJson['properties'] as Map<String, dynamic>)
+        .keys
+        .toSet()
       ..removeWhere((key) => key.contains('@'));
 
     _checkIfArbKeyExist(
