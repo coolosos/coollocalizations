@@ -4,15 +4,15 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:coollocalizations_generator/checker/checker_arguments.dart';
-import 'package:coollocalizations_generator/checker/checker_non_used_files.dart';
+import 'package:coollocalizations_generator/checker/non_used/checker_non_used_arguments.dart';
+import 'package:coollocalizations_generator/checker/non_used/checker_non_used_keys.dart';
 import 'package:coollocalizations_generator/utilities/printer_helper.dart';
 
 import 'package:path/path.dart' as path;
 
 Future<void> main(List<String> arguments) async {
   try {
-    final ArgParser parser = CheckerArguments().parser;
+    final ArgParser parser = CheckerNonUsedArguments().parser;
 
     if (arguments.isNotEmpty && arguments[0] == 'help') {
       stdout.writeln(parser.usage);
@@ -24,22 +24,23 @@ Future<void> main(List<String> arguments) async {
     final File schemaFile = File(
       path.canonicalize(
         path.absolute(
-          result[CheckerArguments.arbSchema],
+          result[CheckerNonUsedArguments.arbSchema],
         ),
       ),
     );
 
     final List<Future> generatorAwaitList = [];
 
-    final String className = result[CheckerArguments.outputFileLocalization];
+    final String className =
+        result[CheckerNonUsedArguments.outputFileLocalization];
 
-    final checkerNonUsedFiles = CheckerNonUsedFiles(
+    final checkerNonUsedFiles = CheckerNonUsedKeys(
       schemaFile: schemaFile,
       resultFile: File("$className.txt"),
       searchDirectory: Directory(
         path.canonicalize(
           path.absolute(
-            result[CheckerArguments.searchDirectory],
+            result[CheckerNonUsedArguments.searchDirectory],
           ),
         ),
       ),

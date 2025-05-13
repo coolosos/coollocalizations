@@ -1,13 +1,13 @@
 // ignore_for_file: avoid_print
 
-import 'dart:convert';
 import 'dart:io';
 
-import '../utilities/directory_management.dart';
-import '../utilities/printer_helper.dart';
+import '../../utilities/directory_management.dart';
+import '../../utilities/printer_helper.dart';
+import '../extension/schema_key_extension.dart';
 
-final class CheckerNonUsedFiles extends PrinterHelper with DirectoryManagement {
-  CheckerNonUsedFiles({
+final class CheckerNonUsedKeys extends PrinterHelper with DirectoryManagement {
+  CheckerNonUsedKeys({
     required this.schemaFile,
     required this.resultFile,
     required this.searchDirectory,
@@ -18,17 +18,13 @@ final class CheckerNonUsedFiles extends PrinterHelper with DirectoryManagement {
   final Directory searchDirectory;
 
   Future<void> run() async {
-    title("Arb Schema Json");
+    title("Arb Non Used Keys");
     print(
       "Reading schema json for obtain all keys"
           .colorizeMessage(PrinterStringColor.yellow, emoji: "🔛"),
     );
-    final String all = await schemaFile.readAsString();
-    final Map<String, dynamic> allJson = json.decode(all);
-    final schemaKeys = (allJson['properties'] as Map<String, dynamic>)
-        .keys
-        .toSet()
-      ..removeWhere((key) => key.contains('@'));
+
+    final schemaKeys = await schemaFile.getSchemaKeysFromProperties;
 
     _checkIfArbKeyExist(
       directoryToCheck: searchDirectory,

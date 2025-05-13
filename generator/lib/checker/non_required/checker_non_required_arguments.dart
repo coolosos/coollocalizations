@@ -1,8 +1,8 @@
 import 'package:args/args.dart';
 
-final class CheckerArguments {
+final class CheckerNonRequiredArguments {
   static const arbSchema = 'arb-schema';
-  static const searchDirectory = 'source-directory';
+  static const searchFile = 'search-file';
   static const outputFileLocalization = 'output-directory';
 
   final ArgParser parser = ArgParser()
@@ -20,9 +20,9 @@ final class CheckerArguments {
       mandatory: true,
     )
     ..addOption(
-      searchDirectory,
+      searchFile,
       abbr: 's',
-      help: 'Search directory',
+      help: 'Search file',
       mandatory: true,
     );
 }
