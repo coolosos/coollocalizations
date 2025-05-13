@@ -31,15 +31,15 @@ Future<void> main(List<String> arguments) async {
 
     final List<Future> generatorAwaitList = [];
 
-    final String className = result[CheckerArguments.nameKey];
+    final String className = result[CheckerArguments.outputFileLocalization];
 
     final checkerNonUsedFiles = CheckerNonUsedFiles(
       schemaFile: schemaFile,
-      resultFile: File("$className.dart"),
+      resultFile: File("$className.txt"),
       searchDirectory: Directory(
         path.canonicalize(
           path.absolute(
-            result[CheckerArguments.outputFileLocalization],
+            result[CheckerArguments.searchDirectory],
           ),
         ),
       ),

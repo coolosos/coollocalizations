@@ -2,7 +2,7 @@ import 'package:args/args.dart';
 
 final class CheckerArguments {
   static const arbSchema = 'arb-schema';
-  static const nameKey = 'source-directory';
+  static const searchDirectory = 'source-directory';
   static const outputFileLocalization = 'output-directory';
 
   final ArgParser parser = ArgParser()
@@ -20,7 +20,7 @@ final class CheckerArguments {
       mandatory: true,
     )
     ..addOption(
-      nameKey,
+      searchDirectory,
       abbr: 's',
       help: 'Search directory',
       mandatory: true,
