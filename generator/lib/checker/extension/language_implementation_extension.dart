@@ -7,12 +7,11 @@ extension SchemaKey on File {
       final String search = await readAsString();
       final Map<String, dynamic> searchJson = json.decode(search);
       final List<dynamic> languageList = searchJson['localizations'];
-      final List<Map<String, dynamic>> languageJson = [];
 
       if (languageList.every(
         (element) => element is Map<String, dynamic>,
       )) {
-        return languageJson.cast<Map<String, dynamic>>();
+        return languageList.cast<Map<String, dynamic>>();
       }
       throw Exception();
     } catch (e) {
