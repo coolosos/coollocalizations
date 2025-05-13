@@ -6,7 +6,6 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:coollocalizations_generator/checker/checker_arguments.dart';
 import 'package:coollocalizations_generator/checker/checker_non_used_files.dart';
-import 'package:coollocalizations_generator/creation/arb_arguments.dart';
 import 'package:coollocalizations_generator/utilities/printer_helper.dart';
 
 import 'package:path/path.dart' as path;
@@ -32,7 +31,7 @@ Future<void> main(List<String> arguments) async {
 
     final List<Future> generatorAwaitList = [];
 
-    final String className = result[ArbArguments.nameKey];
+    final String className = result[CheckerArguments.nameKey];
 
     final checkerNonUsedFiles = CheckerNonUsedFiles(
       schemaFile: schemaFile,
