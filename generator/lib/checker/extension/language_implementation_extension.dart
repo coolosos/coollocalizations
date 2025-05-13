@@ -13,7 +13,7 @@ extension SchemaKey on File {
       final String search = await readAsString();
       final Map<String, dynamic> searchJson = json.decode(search);
       throw Exception(
-        "File it's not as example_array_localizations in json_schema\n$searchJson",
+        "File it's not as example_array_localizations in json_schema\n${searchJson['localizations'].runtimeType}",
       );
     }
   }
