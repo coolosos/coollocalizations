@@ -71,7 +71,6 @@ final class CheckerNonRequiredKeys extends PrinterHelper
       final allKeys = language.keys;
       final List<String> nonNecessaryKeys = [];
       for (String key in allKeys) {
-        print("${schemaKeys.join()}\n$key");
         if (!schemaKeys.contains(key)) {
           nonNecessaryKeys.add(key);
         }
