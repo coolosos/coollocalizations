@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:collection/collection.dart';
 
 extension SchemaKey on File {
   Future<List<Map<String, dynamic>>> get getLanguages async {
