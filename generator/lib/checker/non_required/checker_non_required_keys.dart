@@ -28,7 +28,7 @@ final class CheckerNonRequiredKeys extends PrinterHelper
 
     final schemaKeys = await schemaFile.getSchemaKeysFromProperties;
 
-    final List<Map<String, dynamic>> languages = await schemaFile.getLanguages;
+    final List<Map<String, dynamic>> languages = await searchFile.getLanguages;
 
     final Map<String, List<String>> nonNecessaryKeys =
         _obtainNonNecessary(languages, schemaKeys);
