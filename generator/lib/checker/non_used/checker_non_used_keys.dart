@@ -32,10 +32,11 @@ final class CheckerNonUsedKeys extends PrinterHelper with DirectoryManagement {
     );
 
     if (schemaKeys.isEmpty) {
-      return print(
+      print(
         "All key are used"
             .colorizeMessage(PrinterStringColor.green, emoji: "✅"),
       );
+      exit(0);
     }
 
     print(
@@ -54,6 +55,8 @@ final class CheckerNonUsedKeys extends PrinterHelper with DirectoryManagement {
       "Please review the file ${resultFile.path} "
           .colorizeMessage(PrinterStringColor.yellow, emoji: "🔛"),
     );
+
+    exit(1);
   }
 
   void _checkIfArbKeyExist({

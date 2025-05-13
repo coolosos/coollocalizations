@@ -34,10 +34,12 @@ final class CheckerNonRequiredKeys extends PrinterHelper
         _obtainNonNecessary(languages, schemaKeys);
 
     if (nonNecessaryKeys.isEmpty) {
-      return print(
+      print(
         "All key are necessary"
             .colorizeMessage(PrinterStringColor.green, emoji: "✅"),
       );
+
+      exit(0);
     }
 
     print(
@@ -58,6 +60,8 @@ final class CheckerNonRequiredKeys extends PrinterHelper
       "Please review the file ${resultFile.path} "
           .colorizeMessage(PrinterStringColor.yellow, emoji: "🔛"),
     );
+
+    exit(1);
   }
 
   Map<String, List<String>> _obtainNonNecessary(
