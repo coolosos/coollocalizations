@@ -40,6 +40,8 @@ Future<void> main(List<String> arguments) async {
       allLocalizations: allLocalizationsFile,
       mergeLocalizations: mergeLocalizations,
       outputFile: outputFile,
+      typology:
+          TypologyMerge.fromString(result[MergeSchemasArguments.typology]),
     );
 
     await arbMergeSchemas.run();
