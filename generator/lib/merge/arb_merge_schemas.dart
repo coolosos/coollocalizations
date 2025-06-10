@@ -129,7 +129,9 @@ final class ArbMergeSchemas with PrinterHelper {
       allJson.update(
         merges.key,
         (value) => merges.value,
-        ifAbsent: () => allJson.addEntries({merges}),
+        ifAbsent: () {
+          return merges.value;
+        },
       );
     }
   }
