@@ -6,7 +6,7 @@
         "word": {
             "type": "string"
         },
-        "replacements": {
+        "replacement": {
             "type": "string"
         },
         "locales": {
