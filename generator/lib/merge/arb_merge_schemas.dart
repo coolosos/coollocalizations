@@ -22,6 +22,7 @@ final class ArbMergeSchemas with PrinterHelper {
     required this.mergeLocalizations,
     required this.outputFile,
     required this.typology,
+    required this.replacementWords,
   });
 
   final File allLocalizations;
@@ -30,6 +31,8 @@ final class ArbMergeSchemas with PrinterHelper {
   final File outputFile;
 
   final TypologyMerge typology;
+
+  final Map<String, String>? replacementWords;
 
   Future<void> run() async {
     title("Merge Json");
@@ -63,7 +66,16 @@ final class ArbMergeSchemas with PrinterHelper {
 
     var encoder = const JsonEncoder.withIndent("  ");
 
-    outputFile.writeAsStringSync(encoder.convert(allJson));
+    String fileAsString = encoder.convert(allJson);
+
+    if (replacementWords?.entries case final entries? when entries.isNotEmpty) {
+      for (var replacement in entries) {
+        fileAsString =
+            fileAsString.replaceAll(replacement.key, replacement.value);
+      }
+    }
+
+    outputFile.writeAsStringSync(fileAsString);
     print(
       "Creation file success"
           .colorizeMessage(PrinterStringColor.green, emoji: "✨"),
