@@ -7,19 +7,22 @@ class MergeSchemasArguments {
 
   static const outputFile = 'outputFile';
 
+  static const typology = 'typology';
+  static const replacements = 'replacements';
+
   final ArgParser parser = ArgParser()
     ..addOption(
       allLocalizations,
       abbr: 'a',
       aliases: ["all"],
-      help: 'All localizations file',
+      help: 'All json file',
       mandatory: true,
     )
     ..addOption(
       mergeLocalizations,
       abbr: 'm',
       aliases: ["merge"],
-      help: 'Merge localizations file',
+      help: 'Merge json file',
       mandatory: true,
     )
     ..addOption(
@@ -28,5 +31,18 @@ class MergeSchemasArguments {
       aliases: ["output"],
       mandatory: true,
       help: 'Output file of all json',
+    )
+    ..addOption(
+      typology,
+      aliases: ["type"],
+      allowed: ['localization', "any"],
+      defaultsTo: 'any',
+      help: 'Output file of all json',
+    )
+    ..addOption(
+      replacements,
+      aliases: ["replacements"],
+      abbr: "r",
+      help: 'Array of words replacements',
     );
 }

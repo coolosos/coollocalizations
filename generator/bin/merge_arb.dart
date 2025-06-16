@@ -36,10 +36,15 @@ Future<void> main(List<String> arguments) async {
 
     final File outputFile = File(result[MergeSchemasArguments.outputFile]);
 
+    final String? replacements = result[MergeSchemasArguments.replacements];
+
     final ArbMergeSchemas arbMergeSchemas = ArbMergeSchemas(
       allLocalizations: allLocalizationsFile,
       mergeLocalizations: mergeLocalizations,
       outputFile: outputFile,
+      typology:
+          TypologyMerge.fromString(result[MergeSchemasArguments.typology]),
+          replacementWords: replacements?.toMapOfReplacements()
     );
 
     await arbMergeSchemas.run();
@@ -54,4 +59,30 @@ Future<void> main(List<String> arguments) async {
   }
 
   exit(0);
+}
+
+extension StringToMap on String {
+  Map<String, String>? toMapOfReplacements() {
+    if (isEmpty) {
+      return null;
+    }
+    try {
+      final pairSplit = split(',');
+      final Map<String, String> map = {};
+      for (var pair in pairSplit) {
+        final keyValue = pair.split(':');
+        if (keyValue.first.trim() case final key when key.isNotEmpty) {
+          if (keyValue.last.trim() case final value when value.isNotEmpty) {
+            map.addAll({key: value});
+          }
+        }
+      }
+      if (map.isEmpty) {
+        return null;
+      }
+      return map;
+    } catch (e) {
+      return null;
+    }
+  }
 }
