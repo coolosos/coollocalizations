@@ -9,6 +9,13 @@
                 "$ref": "example_json_localization.json"
             },
             "minItems": 1
+        },
+        "replacement": {
+            "type": "array",
+            "items": {
+                "$ref": "https://raw.githubusercontent.com/coolosos/coollocalizations/main/json_schemas/arb_replacement.json"
+            },
+            "minItems": 1
         }
     },
     "required": [
