@@ -1,0 +1,23 @@
+{
+    "title": "LocalizationsReplacement",
+    "description": "Contains all replacement for Localization json file",
+    "type": "object",
+    "properties": {
+        "word": {
+            "type": "string"
+        },
+        "replacements": {
+            "type": "string"
+        },
+        "locales": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    },
+    "required": [
+        "word",
+        "replacements"
+    ]
+}

@@ -36,15 +36,12 @@ Future<void> main(List<String> arguments) async {
 
     final File outputFile = File(result[MergeSchemasArguments.outputFile]);
 
-    final String? replacements = result[MergeSchemasArguments.replacements];
-
     final ArbMergeSchemas arbMergeSchemas = ArbMergeSchemas(
       allLocalizations: allLocalizationsFile,
       mergeLocalizations: mergeLocalizations,
       outputFile: outputFile,
       typology:
           TypologyMerge.fromString(result[MergeSchemasArguments.typology]),
-          replacementWords: replacements?.toMapOfReplacements()
     );
 
     await arbMergeSchemas.run();
