@@ -100,7 +100,9 @@ final class ArbMergeSchemas with PrinterHelper {
   }) _obtainReplacement(
     Map<String, dynamic> mergeJson,
   ) {
-    final List<Map<String, dynamic>> replacements = mergeJson['replacement'];
+    final List<dynamic> dynamicReplacements = mergeJson['replacement'];
+    final replacements = dynamicReplacements.whereType<Map<String, dynamic>>();
+
     final wordReplacements = replacements
         .map(
           (map) => map.values.map(
