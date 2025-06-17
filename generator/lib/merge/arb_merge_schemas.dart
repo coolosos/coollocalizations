@@ -98,12 +98,14 @@ final class ArbMergeSchemas with PrinterHelper {
   }) _obtainReplacement(
     Map<String, dynamic> mergeJson,
   ) {
-    final List<dynamic> dynamicReplacements = mergeJson['replacement'];
-    final replacements = dynamicReplacements.whereType<Map<String, dynamic>>();
+    final List<dynamic>? dynamicReplacements = mergeJson['replacement'];
+    final replacements =
+        dynamicReplacements?.whereType<Map<String, dynamic>>() ?? [];
 
     final groupByLocalesAndNoLocales = replacements.groupListsBy(
       (element) {
-        return element['locales'] != null;
+        final locales = element['locales'];
+        return locales != null && locales is List;
       },
     );
 
@@ -214,7 +216,7 @@ final class ArbMergeSchemas with PrinterHelper {
 
     return allLocalizations;
   }
-  
+
   ///Iterate all the locales localization and try to replace the words if its possible
   void _replaceAllLocalizationWordsByLocale(
     List<Map<String, dynamic>> replacementWithLocale,
