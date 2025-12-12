@@ -1,0 +1,11 @@
+{
+    "$schema": "../schemas/modification_localizations.json",
+    "localizations": [
+        {
+            "locale": "es",
+            "loginL10n": {
+                "helloLoginL10n": "Welcome to Heldivers"
+            }
+        }
+    ]
+}

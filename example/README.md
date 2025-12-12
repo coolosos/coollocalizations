@@ -1,6 +1,3 @@
-# coollocalizations
-Manage localizations for internationalization
-
 # 🌍 Localization Management Scripts Documentation 
 
 ## 📝 Overview 
@@ -16,14 +13,14 @@ All file names and paths mentioned below are examples and **can be modified** by
 
 Before running any script, the user must create the following template files. These files define the structure, languages, and specific modifications for the localization process. 
 
-### 📁 Generators Directory (`./example/lib/generators/`)
+### 📁 Generators Directory (`./lib/generators/`)
 
 | File Name | Purpose | Used as Schema for | 
 | :--- | :--- | :--- | 
 | `arb.json` | **Base ARB File:** Contains all localization keys and default texts. | - | 
 | `language_localizations.json` | Defines the structure of a language and its text keys. **It's the primary source of truth for all required keys.** | Used by the creation script to generate Dart files. | 
 
-### 📁 Schemas Directory (`./example/lib/schemas/`) 
+### 📁 Schemas Directory (`./lib/schemas/`) 
 | File Name | Purpose | Used as Schema for | 
 | :--- | :--- | :--- | 
 | `array_localizations.json` | **ARB Schema:** Used as the schema for `arb.json` to ensure all necessary language keys are present and prevent missing keys (warnings/errors in development tools). | `arb.json` | 
@@ -34,13 +31,13 @@ The first step is to generate the necessary supporting files (Dart classes, sche
 ### 1. Execute the Creation Script 
 Run the following command from the appropriate directory: 
 ```bash 
-dart run ../generator/bin/creation_arb.dart  -s ./example/lib/generators/language_localizations.json  -n ./example/lib/gen/arb_localizations  -m ./example/lib/gen/modification_schema.json 
+dart run ../generator/bin/creation_arb.dart  -s ./lib/generators/language_localizations.json  -n ./lib/gen/arb_localizations  -m ./lib/gen/modification_schema.json 
 ``` 
  
 | Parameter | Description | 
 | :--- | :--- | 
 | `-s` | Path to the source file (`language_localizations.json`). | 
-| `-n` | **Output name/path** for the generated Dart localization classes (e.g., `./example/lib/gen/arb_localizations` will generate `arb_localizations.dart`, etc.). | 
+| `-n` | **Output name/path** for the generated Dart localization classes (e.g., `./lib/gen/arb_localizations` will generate `arb_localizations.dart`, etc.). | 
 | `-m` | **Output path** for the generated modification schema file (`modification_schema.json`). | 
 
 ### 2. Run Code Generation (JsonSerializable) 
@@ -49,7 +46,7 @@ After executing the creation script, you must generate the boilerplate code for 
 dart run build_runner build --delete-conflicting-outputs 
 ``` 
 ### 3. Generated Artifacts
-Upon successful execution, the following files will be generated/modified within the `./example/lib/gen/` directory: 
+Upon successful execution, the following files will be generated/modified within the `./lib/gen/` directory: 
 
 * **`arb_localizations_divisions`**: Contains class divisions (e.g., if localization keys are grouped). 
 * **`arb_localizations_merge.dart`**: The file used for potentially modifying localization information remotely (e.g., dynamic updates). 
@@ -62,7 +59,7 @@ Upon successful execution, the following files will be generated/modified within
 
 The merge script allows for modification of the base `arb.json` output, which is especially useful when multiple applications share the same base keys but require partial or complete changes to some values. 
 
-### 1. Merge Directory Setup (`./example/lib/merge/`) 
+### 1. Merge Directory Setup (`./lib/merge/`) 
 | File Name | Generation Method | Purpose | 
 | :--- | :--- | :--- | 
 | `arb_merge.json` | **Manually Created** | Uses the `modification_localizations.json` schema. Specifies the changes for the base ARB file, typically defined per language. | 
@@ -73,7 +70,7 @@ The merge script allows for modification of the base `arb.json` output, which is
 ### 2. Execute the Merge Script
 After defining the necessary changes in `arb_merge.json`, run the script: 
 ```bash 
-dart run ../generator/bin/merge_arb.dart  -a lib/generators/arb.json  -m ./example/lib/merge/arb_merge.json  -o ./example/lib/merge/arb_after_merge.json  --typology localization 
+dart run ../generator/bin/merge_arb.dart  -a lib/generators/arb.json  -m ./lib/merge/arb_merge.json  -o ./lib/merge/arb_after_merge.json  --typology localization 
 ``` 
 | Parameter | Description | 
 | :--- | :--- | 
