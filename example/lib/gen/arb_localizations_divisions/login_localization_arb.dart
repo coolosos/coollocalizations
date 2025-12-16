@@ -1,5 +1,4 @@
 import 'package:coollocalizations/coollocalizations.dart';
-part 'login_localization_arb.g.dart';
 
 final class LoginLocalizationArb {
   LoginLocalizationArb({

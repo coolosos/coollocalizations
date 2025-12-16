@@ -15,8 +15,6 @@ import 'package:coollocalizations/coollocalizations.dart';
 
 import "arb_localizations_divisions/login_localization_arb.dart";
 
-part "arb_localizations_merge.g.dart";
-
 abstract interface class ArbLocalizationsMergeMerge {
   const ArbLocalizationsMergeMerge({required this.localizations});
 
@@ -42,7 +40,4 @@ class LanguageLocalizationMerge {
   final LoginLocalizationArb? loginLocalizationArb;
   final Map<String, dynamic> _json;
   Map<String, dynamic> get jsonMerge => _json;
-  factory LanguageLocalizationMerge.fromJson(Map<String, dynamic> json) {
-    return _$LanguageLocalizationMergeFromJson(json);
-  }
 }

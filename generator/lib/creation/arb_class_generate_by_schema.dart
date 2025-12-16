@@ -51,8 +51,6 @@ final class ArbClassGenerateBySchema with PrinterHelper {
 // ignore_for_file: directives_ordering,unnecessary_import,implicit_dynamic_list_literal,deprecated_member_use
 
 """;
-
-    final generatorPart = "${fileNameCases.name}.g.dart";
     final importOfMerge =
         isForMerge ? "" : "import '${fileNameCases.name}_merge.dart';";
     final imports = """
@@ -69,8 +67,6 @@ ${schemas.importDivisions(
 ${isForMerge ? '' : schemas.exportDivisions(
             fileNameCases.name,
           )}
-part "$generatorPart";
-
 
 """;
 
@@ -98,18 +94,9 @@ class $arbLanguageLocalizationsClassName {
     final classFinals =
         "${schemas.finalFields(isForMerge: isForMerge)}\n${isForMerge ? "Map<String, dynamic> get jsonMerge => _json;" : ""}";
 
-    final creationFunction = """
-
-factory $arbLanguageLocalizationsClassName.fromJson(Map<String, dynamic> json) {
-    return _\$${arbLanguageLocalizationsClassName}FromJson(json);
-  }
-  """;
-
     String fromMergeLocalizations = isForMerge
         ? ""
         : """
-
-
 $arbLanguageLocalizationsClassName updateFromMerge(${arbLanguageLocalizationsClassName}Merge merge){
   return $arbLanguageLocalizationsClassName(
        json:_json
@@ -122,7 +109,7 @@ $arbLanguageLocalizationsClassName updateFromMerge(${arbLanguageLocalizationsCla
 """;
 
     resultFile.writeAsStringSync(
-      "$generateCodeExplanation$imports$localizationListObject$classInitialization$classRequirements$classFinals$creationFunction$fromMergeLocalizations\n}",
+      "$generateCodeExplanation$imports$localizationListObject$classInitialization$classRequirements$classFinals$fromMergeLocalizations\n}",
     );
 
     if (!isForMerge) {
@@ -230,7 +217,6 @@ extension SchemasToFinalFields on List<ArbSchemaCreation> {
 
           final classContent = """
 import 'package:coollocalizations/coollocalizations.dart';
-part '${(title.toSnakeCase() ?? 'empty')}.g.dart';
   final class $title{
     $title({
     ${e.fields.requiredFields().replaceFirst("_json=json,", '')}
