@@ -24,23 +24,29 @@ abstract interface class ArbLocalizations {
 }
 
 class LanguageLocalization {
-  LanguageLocalization({
-required Map<String, dynamic> json}): _json=json,locale = json['locale'] as String,homeWelcomeMessage = MultiChoiceReplacementsLocalizations.fromJson(json['homeWelcomeMessage'] as Map<String, dynamic>,),landingPackHelpTitle = json['landingPackHelpTitle'] as String,loginLocalizationArb = LoginLocalizationArb(json: json['loginLocalizationArb'] as Map<String, dynamic>,);
-factory LanguageLocalization.fromJson(Map<String, dynamic> json) => LanguageLocalization(json:json);
+  LanguageLocalization({required Map<String, dynamic> json})
+      : _json = json,
+        locale = json['locale'] as String,
+        homeWelcomeMessage = MultiChoiceReplacementsLocalizations.fromJson(
+          json['homeWelcomeMessage'] as Map<String, dynamic>,
+        ),
+        landingPackHelpTitle = json['landingPackHelpTitle'] as String,
+        loginLocalizationArb = LoginLocalizationArb(
+          json: json['loginLocalizationArb'] as Map<String, dynamic>,
+        );
+  factory LanguageLocalization.fromJson(Map<String, dynamic> json) =>
+      LanguageLocalization(json: json);
 
-final String locale;
-final MultiChoiceReplacementsLocalizations homeWelcomeMessage;
-final String landingPackHelpTitle;
-final LoginLocalizationArb loginLocalizationArb;
- final Map<String, dynamic> _json;
-LanguageLocalization updateFromMerge(LanguageLocalizationMerge merge){
-  return LanguageLocalization(
-       json:_json
+  final String locale;
+  final MultiChoiceReplacementsLocalizations homeWelcomeMessage;
+  final String landingPackHelpTitle;
+  final LoginLocalizationArb loginLocalizationArb;
+  final Map<String, dynamic> _json;
+  LanguageLocalization updateFromMerge(LanguageLocalizationMerge merge) {
+    return LanguageLocalization(
+        json: _json
           ..updateAll(
             (key, value) => merge.jsonMerge[key],
-          )
-  );
-}
-
-
+          ));
+  }
 }
