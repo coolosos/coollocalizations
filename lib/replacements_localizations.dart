@@ -1,4 +1,4 @@
-import 'package:coollocalizations/extension/replace_extension.dart';
+import 'extension/replace_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part "replacements_localizations.g.dart";
@@ -22,9 +22,11 @@ class ReplacementsLocalizations {
     Map<String, dynamic> substitutesWords, {
     required String? locale,
   }) {
-    return value.substitute(substitutesWords.formatDateTime(
-      dateTimeReplacements,
-      locale: locale,
-    ));
+    return value.substitute(
+      substitutesWords.formatDateTime(
+        dateTimeReplacements,
+        locale: locale,
+      ),
+    );
   }
 }

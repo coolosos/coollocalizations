@@ -1,23 +1,14 @@
 import 'package:coollocalizations/coollocalizations.dart';
-import 'package:json_annotation/json_annotation.dart';
-part 'login_localization_arb.g.dart';
-@JsonSerializable()
-  final class LoginLocalizationArb{
-    const LoginLocalizationArb({
-    required this.helloLoginL10n,
-required this.multiChoiceL10n,
-required this.helloLoginL10n1});
 
+final class LoginLocalizationArb {
+  LoginLocalizationArb({required Map<String, dynamic> json})
+      : helloLoginL10n = json['helloLoginL10n'] as String,
+        multiChoiceL10n = MultiChoiceReplacementsLocalizations.fromJson(
+          json['multiChoiceL10n'] as Map<String, dynamic>,
+        ),
+        helloLoginL10n1 = json['helloLoginL10n1'] as String;
 
-    final String helloLoginL10n;
-final MultiChoiceReplacementsLocalizations multiChoiceL10n;
-final String helloLoginL10n1;
-
-
-
-
-  factory LoginLocalizationArb.fromJson(Map<String, dynamic> json) {
-    return _$LoginLocalizationArbFromJson(json);
-  }
-
-  }
+  final String helloLoginL10n;
+  final MultiChoiceReplacementsLocalizations multiChoiceL10n;
+  final String helloLoginL10n1;
+}

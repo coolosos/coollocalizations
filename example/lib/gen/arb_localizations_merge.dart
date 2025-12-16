@@ -11,35 +11,34 @@
 
 library;
 
-import 'package:json_annotation/json_annotation.dart';
 import 'package:coollocalizations/coollocalizations.dart';
-
 
 import "arb_localizations_divisions/login_localization_arb.dart";
 
-part "arb_localizations_merge.g.dart";
-
-
-abstract interface class ArbLocalizationsMergeMerge {
-  const ArbLocalizationsMergeMerge({required this.localizations});
+abstract interface class ArbLocalizationsMerge {
+  const ArbLocalizationsMerge({required this.localizations});
 
   final List<LanguageLocalizationMerge> localizations;
 }
-@JsonSerializable()
+
 class LanguageLocalizationMerge {
-  const LanguageLocalizationMerge({
-required this.locale,
-required this.homeWelcomeMessage,
-required this.landingPackHelpTitle,
-required this.loginLocalizationArb});
+  LanguageLocalizationMerge({required Map<String, dynamic> json})
+      : _json = json,
+        locale = json['locale'] as String,
+        homeWelcomeMessage = MultiChoiceReplacementsLocalizations.fromJson(
+          json['homeWelcomeMessage'] as Map<String, dynamic>,
+        ),
+        landingPackHelpTitle = json['landingPackHelpTitle'] as String,
+        loginLocalizationArb = LoginLocalizationArb(
+          json: json['loginLocalizationArb'] as Map<String, dynamic>,
+        );
+  factory LanguageLocalizationMerge.fromJson(Map<String, dynamic> json) =>
+      LanguageLocalizationMerge(json: json);
 
-final String? locale;
-final MultiChoiceReplacementsLocalizations? homeWelcomeMessage;
-final String? landingPackHelpTitle;
-final LoginLocalizationArb? loginLocalizationArb;
-
-factory LanguageLocalizationMerge.fromJson(Map<String, dynamic> json) {
-    return _$LanguageLocalizationMergeFromJson(json);
-  }
-  
+  final String? locale;
+  final MultiChoiceReplacementsLocalizations? homeWelcomeMessage;
+  final String? landingPackHelpTitle;
+  final LoginLocalizationArb? loginLocalizationArb;
+  final Map<String, dynamic> _json;
+  Map<String, dynamic> get jsonMerge => _json;
 }
