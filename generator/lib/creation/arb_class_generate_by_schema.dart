@@ -70,15 +70,12 @@ ${isForMerge ? '' : schemas.exportDivisions(
 
 """;
 
-    final String arbLocalizationsClassName =
-        isForMerge ? fileNameCases.className : fileNameCases.className;
-
     final String arbLanguageLocalizationsClassName =
         isForMerge ? "LanguageLocalizationMerge" : "LanguageLocalization";
 
     final localizationListObject = """
-abstract interface class $arbLocalizationsClassName {
-  const $arbLocalizationsClassName({required this.localizations});
+abstract interface class ${fileNameCases.className} {
+  const ${fileNameCases.className}({required this.localizations});
 
   final List<$arbLanguageLocalizationsClassName> localizations;
 }
@@ -93,7 +90,12 @@ class $arbLanguageLocalizationsClassName {
     final classFinals =
         "${schemas.finalFields(isForMerge: isForMerge)}\n${isForMerge ? "Map<String, dynamic> get jsonMerge => _json;" : ""}";
 
-    String fromMergeLocalizations = isForMerge
+    final String fromJson = """
+factory $arbLanguageLocalizationsClassName.fromJson(Map<String, dynamic> json) => $arbLanguageLocalizationsClassName(json:json);
+
+""";
+
+    final String fromMergeLocalizations = isForMerge
         ? ""
         : """
 $arbLanguageLocalizationsClassName updateFromMerge(${arbLanguageLocalizationsClassName}Merge merge){
@@ -108,7 +110,7 @@ $arbLanguageLocalizationsClassName updateFromMerge(${arbLanguageLocalizationsCla
 """;
 
     resultFile.writeAsStringSync(
-      "$generateCodeExplanation$imports$localizationListObject$classInitialization$classRequirements$classFinals$fromMergeLocalizations\n}",
+      "$generateCodeExplanation$imports$localizationListObject$classInitialization$classRequirements$fromJson$classFinals$fromMergeLocalizations\n}",
     );
 
     if (!isForMerge) {
