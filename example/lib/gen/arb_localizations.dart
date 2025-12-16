@@ -11,7 +11,6 @@
 
 library;
 
-import 'package:json_annotation/json_annotation.dart';
 import 'package:coollocalizations/coollocalizations.dart';
 import 'arb_localizations_merge.dart';
 
@@ -19,37 +18,40 @@ import "arb_localizations_divisions/login_localization_arb.dart";
 export "arb_localizations_divisions/login_localization_arb.dart";
 part "arb_localizations.g.dart";
 
-
 abstract interface class ArbLocalizations {
   const ArbLocalizations({required this.localizations});
 
   final List<LanguageLocalization> localizations;
 }
-@JsonSerializable()
+
 class LanguageLocalization {
-  const LanguageLocalization({
-required this.locale,
-required this.homeWelcomeMessage,
-required this.landingPackHelpTitle,
-required this.loginLocalizationArb});
+  LanguageLocalization({required Map<String, dynamic> json})
+      : _json = json,
+        locale = json['locale'] as String,
+        homeWelcomeMessage = MultiChoiceReplacementsLocalizations.fromJson(
+          json['homeWelcomeMessage'] as Map<String, dynamic>,
+        ),
+        landingPackHelpTitle = json['landingPackHelpTitle'] as String,
+        helloLoginL10n = json['helloLoginL10n'] as String,
+        loginLocalizationArb = LoginLocalizationArb(
+          json: json['loginLocalizationArb'] as Map<String, dynamic>,
+        );
+  final String locale;
+  final MultiChoiceReplacementsLocalizations homeWelcomeMessage;
+  final String landingPackHelpTitle;
+  final String helloLoginL10n;
+  final LoginLocalizationArb loginLocalizationArb;
+  final Map<String, dynamic> _json;
 
-final String locale;
-final MultiChoiceReplacementsLocalizations homeWelcomeMessage;
-final String landingPackHelpTitle;
-final LoginLocalizationArb loginLocalizationArb;
-
-factory LanguageLocalization.fromJson(Map<String, dynamic> json) {
+  factory LanguageLocalization.fromJson(Map<String, dynamic> json) {
     return _$LanguageLocalizationFromJson(json);
   }
-  
-LanguageLocalization updateFromMerge(LanguageLocalizationMerge merge){
-  return LanguageLocalization(
-      locale : merge.locale ?? locale,
-homeWelcomeMessage : merge.homeWelcomeMessage ?? homeWelcomeMessage,
-landingPackHelpTitle : merge.landingPackHelpTitle ?? landingPackHelpTitle,
-loginLocalizationArb : merge.loginLocalizationArb ?? loginLocalizationArb
-  );
-}
 
-
+  LanguageLocalization updateFromMerge(LanguageLocalizationMerge merge) {
+    return LanguageLocalization(
+        json: _json
+          ..updateAll(
+            (key, value) => merge.jsonMerge[key],
+          ));
+  }
 }

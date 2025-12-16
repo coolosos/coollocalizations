@@ -60,7 +60,6 @@ final class ArbClassGenerateBySchema with PrinterHelper {
 
 library;
 
-import 'package:json_annotation/json_annotation.dart';
 import 'package:coollocalizations/coollocalizations.dart';
 $importOfMerge
 
@@ -91,12 +90,13 @@ abstract interface class $arbLocalizationsClassName {
 """;
 
     final classInitialization = """
-@JsonSerializable()
+
 class $arbLanguageLocalizationsClassName {
-  const $arbLanguageLocalizationsClassName({
+  $arbLanguageLocalizationsClassName({
 """;
     final classRequirements = schemas.requiredFields();
-    final classFinals = schemas.finalFields(isForMerge: isForMerge);
+    final classFinals =
+        "${schemas.finalFields(isForMerge: isForMerge)}\n${isForMerge ? "Map<String, dynamic> get jsonMerge => _json;" : ""}";
 
     final creationFunction = """
 
@@ -109,9 +109,13 @@ factory $arbLanguageLocalizationsClassName.fromJson(Map<String, dynamic> json) {
         ? ""
         : """
 
+
 $arbLanguageLocalizationsClassName updateFromMerge(${arbLanguageLocalizationsClassName}Merge merge){
   return $arbLanguageLocalizationsClassName(
-      ${schemas.mergeFields()}
+       json:_json
+          ..updateAll(
+            (key, value) => merge.jsonMerge[key],
+          )
   );
 }
 
@@ -147,8 +151,43 @@ extension SchemasToFinalFields on List<ArbSchemaCreation> {
             """import "${fatherName}_divisions/${e.title.toSnakeCase()}.dart";""",
       )
       .join('\n');
-  String requiredFields() =>
-      "${map((e) => "required this.${e.title.toLowerCamelCase()}").join(",\n")}});\n\n";
+  String requiredFields() {
+    final instantiations = map((e) {
+      return switch (e) {
+        ArbRefCreation() => () {
+            return e.type.resolve(
+              onSimple: () =>
+                  "${e.title} = json['${e.title.toLowerCamelCase()}'] as String",
+              onMultiChoice: () =>
+                  "${e.title} = MultiChoiceLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)",
+              onMultiChoiceReplacements: () =>
+                  "${e.title} = MultiChoiceReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)",
+              onReplacements: () =>
+                  "${e.title} = ReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)",
+              onReplacementsList: () =>
+                  "${e.title} = ReplacementsListLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)",
+              onList: () =>
+                  "${e.title} = (json['${e.title.toLowerCamelCase()}'] as List<dynamic>).map((e) => e as String).toList()",
+            );
+          },
+        ArbObjectCreation() => () {
+            return "${e.title.toLowerCamelCase()} = ${e.title}(json: json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)";
+          },
+      }();
+    }).toList();
+
+    StringBuffer buffer =
+        StringBuffer("required Map<String, dynamic> json}): _json=json,");
+    for (var i = 0; i < instantiations.length; i++) {
+      final instance = instantiations[i];
+      buffer.write(instance);
+      if (i != instantiations.length - 1) {
+        buffer.write(',');
+      }
+    }
+    buffer.writeln(";");
+    return buffer.toString();
+  }
 
   String finalFields({required bool isForMerge}) {
     return "${map(
@@ -167,13 +206,15 @@ extension SchemasToFinalFields on List<ArbSchemaCreation> {
               "final ${e.title}${isForMerge ? "?" : ""} ${e.title.toLowerCamelCase()}",
         }();
       },
-    ).join(";\n")};\n";
+    ).join(";\n")};\n final Map<String, dynamic> _json;";
   }
 
-  String mergeFields() => map(
-        (e) =>
-            "${e.title.toLowerCamelCase()} : merge.${e.title.toLowerCamelCase()} ?? ${e.title.toLowerCamelCase()}",
-      ).join(",\n");
+  String mergeFields() {
+    return map(
+      (e) =>
+          "${e.title.toLowerCamelCase()} : merge.${e.title.toLowerCamelCase()} ?? ${e.title.toLowerCamelCase()}",
+    ).join(",\n");
+  }
 
   Future<void> classGeneration(String generatorPath, String fatherName) async {
     final classDir =
@@ -189,19 +230,11 @@ extension SchemasToFinalFields on List<ArbSchemaCreation> {
 
           final classContent = """
 import 'package:coollocalizations/coollocalizations.dart';
-import 'package:json_annotation/json_annotation.dart';
 part '${(title.toSnakeCase() ?? 'empty')}.g.dart';
-@JsonSerializable()
   final class $title{
-    const $title({
-    ${e.fields.requiredFields()}
-    ${e.fields.finalFields(isForMerge: false)}
-
-
-
-  factory $title.fromJson(Map<String, dynamic> json) {
-    return _\$${title}FromJson(json);
-  }
+    $title({
+    ${e.fields.requiredFields().replaceFirst("_json=json,", '')}
+    ${e.fields.finalFields(isForMerge: false).replaceFirst("final Map<String, dynamic> _json;", '')}
 
   }
 """;

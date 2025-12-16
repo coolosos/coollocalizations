@@ -3,8 +3,9 @@
     "localizations": [
         {
             "locale": "es",
+            "landingPackHelpTitle": "Help NO WORKING for landing",
             "loginL10n": {
-                "helloLoginL10n": "Welcome to Heldivers"
+                "helloLoginL10n1": "Hello for Heldivers"
             }
         }
     ]

@@ -13,6 +13,9 @@
     "landingPackHelpTitle": {
       "$ref": "https://raw.githubusercontent.com/coolosos/coollocalizations/main/json_schemas/arb_instances.json#/objects/simple"
     },
+    "helloLoginL10n": {
+      "$ref": "https://raw.githubusercontent.com/coolosos/coollocalizations/main/json_schemas/arb_instances.json#/objects/simple"
+    },
     "loginL10n": {
       "name": "LoginLocalizationArb",
       "properties": {
