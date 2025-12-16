@@ -15,8 +15,8 @@ import 'package:coollocalizations/coollocalizations.dart';
 
 import "arb_localizations_divisions/login_localization_arb.dart";
 
-abstract interface class ArbLocalizationsMergeMerge {
-  const ArbLocalizationsMergeMerge({required this.localizations});
+abstract interface class ArbLocalizationsMerge {
+  const ArbLocalizationsMerge({required this.localizations});
 
   final List<LanguageLocalizationMerge> localizations;
 }
@@ -29,14 +29,12 @@ class LanguageLocalizationMerge {
           json['homeWelcomeMessage'] as Map<String, dynamic>,
         ),
         landingPackHelpTitle = json['landingPackHelpTitle'] as String,
-        helloLoginL10n = json['helloLoginL10n'] as String,
         loginLocalizationArb = LoginLocalizationArb(
           json: json['loginLocalizationArb'] as Map<String, dynamic>,
         );
   final String? locale;
   final MultiChoiceReplacementsLocalizations? homeWelcomeMessage;
   final String? landingPackHelpTitle;
-  final String? helloLoginL10n;
   final LoginLocalizationArb? loginLocalizationArb;
   final Map<String, dynamic> _json;
   Map<String, dynamic> get jsonMerge => _json;

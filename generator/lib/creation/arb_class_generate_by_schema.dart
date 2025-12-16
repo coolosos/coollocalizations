@@ -70,9 +70,8 @@ ${isForMerge ? '' : schemas.exportDivisions(
 
 """;
 
-    final String arbLocalizationsClassName = isForMerge
-        ? "${fileNameCases.className}Merge"
-        : fileNameCases.className;
+    final String arbLocalizationsClassName =
+        isForMerge ? fileNameCases.className : fileNameCases.className;
 
     final String arbLanguageLocalizationsClassName =
         isForMerge ? "LanguageLocalizationMerge" : "LanguageLocalization";
