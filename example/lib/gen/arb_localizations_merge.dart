@@ -23,15 +23,15 @@ abstract interface class ArbLocalizationsMerge {
 
 class LanguageLocalizationMerge {
   LanguageLocalizationMerge({required Map<String, dynamic> json})
-      : _json = json,
-        locale = json['locale'] as String,
-        homeWelcomeMessage = MultiChoiceReplacementsLocalizations.fromJson(
-          json['homeWelcomeMessage'] as Map<String, dynamic>,
-        ),
-        landingPackHelpTitle = json['landingPackHelpTitle'] as String,
-        loginLocalizationArb = LoginLocalizationArb(
-          json: json['loginLocalizationArb'] as Map<String, dynamic>,
-        );
+    : _json = json,
+      locale = json['locale'] as String,
+      homeWelcomeMessage = MultiChoiceReplacementsLocalizations.fromJson(
+        json['homeWelcomeMessage'] as Map<String, dynamic>,
+      ),
+      landingPackHelpTitle = json['landingPackHelpTitle'] as String,
+      loginLocalizationArb = LoginLocalizationArb(
+        json: json['loginLocalizationArb'] as Map<String, dynamic>,
+      );
   factory LanguageLocalizationMerge.fromJson(Map<String, dynamic> json) =>
       LanguageLocalizationMerge(json: json);
 

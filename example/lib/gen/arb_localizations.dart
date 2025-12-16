@@ -44,9 +44,7 @@ class LanguageLocalization {
   final Map<String, dynamic> _json;
   LanguageLocalization updateFromMerge(LanguageLocalizationMerge merge) {
     return LanguageLocalization(
-        json: _json
-          ..updateAll(
-            (key, value) => merge.jsonMerge[key],
-          ));
+      json: _json..updateAll((key, value) => merge.jsonMerge[key]),
+    );
   }
 }

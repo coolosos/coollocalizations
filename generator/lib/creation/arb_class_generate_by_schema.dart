@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dart_style/dart_style.dart';
+
 import '../utilities/printer_helper.dart';
 import 'utilities/arb_name_case.dart';
 import 'utilities/arb_schema_creation.dart';
@@ -110,7 +112,10 @@ $arbLanguageLocalizationsClassName updateFromMerge(${arbLanguageLocalizationsCla
 """;
 
     resultFile.writeAsStringSync(
-      "$generateCodeExplanation$imports$localizationListObject$classInitialization$classRequirements$fromJson$classFinals$fromMergeLocalizations\n}",
+      DartFormatter(languageVersion: DartFormatter.latestLanguageVersion)
+          .format(
+        "$generateCodeExplanation$imports$localizationListObject$classInitialization$classRequirements$fromJson$classFinals$fromMergeLocalizations\n}",
+      ),
     );
 
     if (!isForMerge) {
