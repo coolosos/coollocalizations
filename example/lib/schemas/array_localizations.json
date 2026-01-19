@@ -1,0 +1,17 @@
+{
+    "title": "LocalizationsArray",
+    "description": "Localizations array with all available languages",
+    "type": "object",
+    "properties": {
+        "localizations": {
+            "type": "array",
+            "items": {
+                "$ref": "../generators/language_localizations.json"
+            },
+            "minItems": 1
+        }
+    },
+    "required": [
+        "localizations"
+    ]
+}

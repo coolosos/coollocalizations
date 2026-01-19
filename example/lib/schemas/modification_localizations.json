@@ -1,0 +1,24 @@
+{
+    "title": "ModificationsLocalizations",
+    "description": "Localizations array with all available languages",
+    "type": "object",
+    "properties": {
+        "localizations": {
+            "type": "array",
+            "items": {
+                "$ref": "../gen/modification_schema.json"
+            },
+            "minItems": 1
+        },
+        "replacement": {
+            "type": "array",
+            "items": {
+                "$ref": "https://raw.githubusercontent.com/coolosos/coollocalizations/refs/heads/main/json_schemas/arb_replacement.json"
+            },
+            "minItems": 1
+        }
+    },
+    "required": [
+        "localizations"
+    ]
+}

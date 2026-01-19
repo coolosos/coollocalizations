@@ -1,0 +1,12 @@
+{
+    "$schema": "../schemas/modification_localizations.json",
+    "localizations": [
+        {
+            "locale": "es",
+            "landingPackHelpTitle": "Help NO WORKING for landing",
+            "loginL10n": {
+                "helloLoginL10n1": "Hello for Heldivers"
+            }
+        }
+    ]
+}

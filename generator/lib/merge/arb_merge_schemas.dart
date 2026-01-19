@@ -54,7 +54,6 @@ final class ArbMergeSchemas with PrinterHelper {
     if (mergeJson['checkSchema'] != null) {
       allJson['\$schema'] = mergeJson['checkSchema'];
     }
-
     final fromLocalization = obtainLocalizations(mergeJson, allJson);
 
     if (fromLocalization case final fromLocalization?) {
@@ -281,6 +280,28 @@ final class ArbMergeSchemas with PrinterHelper {
             "Update {${merges.key}:${merges.value}.}"
                 .colorizeMessage(PrinterStringColor.green, emoji: "✅"),
           );
+          if (merges.value case final complexValues when complexValues is Map) {
+            final entryToOverride =
+                internalLocalizationWithAllLocalizations.entries.firstWhere(
+              (element) => element.key == merges.key,
+            );
+            final valueToOverride = entryToOverride.value as Map;
+            for (var internalValues in complexValues.entries) {
+              valueToOverride.update(
+                internalValues.key,
+                (value) => internalValues.value,
+                ifAbsent: () {
+                  print(
+                    "Added ${merges.key} with value ${merges.value}. This key doesn't exist in the previous json"
+                        .colorizeMessage(PrinterStringColor.red, emoji: "🚨"),
+                  );
+
+                  return internalValues.value;
+                },
+              );
+            }
+            return valueToOverride;
+          }
 
           return merges.value;
         },

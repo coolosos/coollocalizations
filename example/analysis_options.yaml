@@ -1,0 +1,3 @@
+include: package:coolint/coolint.yaml
+analyzer:
+  exclude: [/**/__brick__/**]

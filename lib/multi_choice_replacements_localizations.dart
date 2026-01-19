@@ -1,4 +1,4 @@
-import 'package:coollocalizations/extension/replace_extension.dart';
+import 'extension/replace_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part "multi_choice_replacements_localizations.g.dart";

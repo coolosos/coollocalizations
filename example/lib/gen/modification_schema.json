@@ -1,0 +1,34 @@
+{
+  "$schema": "https://raw.githubusercontent.com/coolosos/coollocalizations/main/json_schemas/arb_localization.json",
+  "title": "Localization",
+  "description": "Localization finetwork schema",
+  "type": "object",
+  "properties": {
+    "locale": {
+      "$ref": "https://raw.githubusercontent.com/coolosos/coollocalizations/main/json_schemas/arb_instances.json#/objects/simple"
+    },
+    "homeWelcomeMessage": {
+      "$ref": "https://raw.githubusercontent.com/coolosos/coollocalizations/main/json_schemas/arb_instances.json#/objects/multiChoiceReplacements"
+    },
+    "landingPackHelpTitle": {
+      "$ref": "https://raw.githubusercontent.com/coolosos/coollocalizations/main/json_schemas/arb_instances.json#/objects/simple"
+    },
+    "loginL10n": {
+      "name": "LoginLocalizationArb",
+      "properties": {
+        "helloLoginL10n": {
+          "$ref": "https://raw.githubusercontent.com/coolosos/coollocalizations/main/json_schemas/arb_instances.json#/objects/simple"
+        },
+        "multiChoiceL10n": {
+          "$ref": "https://raw.githubusercontent.com/coolosos/coollocalizations/main/json_schemas/arb_instances.json#/objects/multiChoiceReplacements"
+        },
+        "helloLoginL10n1": {
+          "$ref": "https://raw.githubusercontent.com/coolosos/coollocalizations/main/json_schemas/arb_instances.json#/objects/simple"
+        }
+      },
+      "type": "object",
+      "required": []
+    }
+  },
+  "required": []
+}

@@ -1,0 +1,26 @@
+{
+    "$schema": "../schemas/array_localizations.json",
+    "localizations": [
+        {
+            "locale": "es",
+            "homeWelcomeMessage": {
+                "definition": {
+                    "name": "Hello {name},",
+                    "other": "Hello,"
+                }
+            },
+            "landingPackHelpTitle": "Help Title for landing",
+            "welcomeMessage": "Welcome message for login y lobby",
+            "loginL10n": {
+                "helloLoginL10n": "Hello login",
+                "helloLoginL10n1": "23324",
+                "multiChoiceL10n": {
+                    "definition": {
+                        "1": "Only one element",
+                        "other": "By default"
+                    }
+                }
+            }
+        }
+    ]
+}
