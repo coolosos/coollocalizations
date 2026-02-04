@@ -146,14 +146,30 @@ extension SchemasToFinalFields on List<ArbSchemaCreation> {
             return e.type.resolve(
               onSimple: () =>
                   "${e.title} = json['${e.title.toLowerCamelCase()}'] as ${isForMerge ? 'String?' : 'String'}",
-              onMultiChoice: () =>
-                  "${e.title} = MultiChoiceLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as ${isForMerge ? 'Map<String, dynamic>?' : 'Map<String, dynamic>'},)",
-              onMultiChoiceReplacements: () =>
-                  "${e.title} = MultiChoiceReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as ${isForMerge ? 'Map<String, dynamic>?' : 'Map<String, dynamic>'},)",
-              onReplacements: () =>
-                  "${e.title} = ReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as ${isForMerge ? 'Map<String, dynamic>?' : 'Map<String, dynamic>'},)",
-              onReplacementsList: () =>
-                  "${e.title} = ReplacementsListLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as ${isForMerge ? 'Map<String, dynamic>?' : 'Map<String, dynamic>'},)",
+              onMultiChoice: () {
+                if (isForMerge) {
+                  return "${e.title} = json['${e.title.toLowerCamelCase()}'] is Map<String, dynamic> ?  MultiChoiceLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,): null";
+                }
+                return "${e.title} = MultiChoiceLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)";
+              },
+              onMultiChoiceReplacements: () {
+                if (isForMerge) {
+                  return "${e.title} = json['${e.title.toLowerCamelCase()}'] is Map<String, dynamic> ?  MultiChoiceReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,): null";
+                }
+                return "${e.title} = MultiChoiceReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)";
+              },
+              onReplacements: () {
+                if (isForMerge) {
+                  return "${e.title} = json['${e.title.toLowerCamelCase()}'] is Map<String, dynamic> ?  ReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,): null";
+                }
+                return "${e.title} = ReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)";
+              },
+              onReplacementsList: () {
+                if (isForMerge) {
+                  return "${e.title} = json['${e.title.toLowerCamelCase()}'] is Map<String, dynamic> ?  ReplacementsListLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,): null";
+                }
+                return "${e.title} = ReplacementsListLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)";
+              },
               onList: () {
                 if (isForMerge) {
                   return "${e.title} = (json['${e.title.toLowerCamelCase()}'] as List<dynamic>?)?.map((e) => e as String).toList()";
@@ -163,7 +179,10 @@ extension SchemasToFinalFields on List<ArbSchemaCreation> {
             );
           },
         ArbObjectCreation() => () {
-            return "${e.title.toLowerCamelCase()} = ${e.title}(json: json['${e.title.toLowerCamelCase()}'] as ${isForMerge ? 'Map<String, dynamic>?' : 'Map<String, dynamic>'},)";
+            if (isForMerge) {
+              return "${e.title.toLowerCamelCase()} = json['${e.title.toLowerCamelCase()}'] is Map<String, dynamic> ?  ${e.title}(json: json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,): null";
+            }
+            return "${e.title.toLowerCamelCase()} = ${e.title}(json: json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)";
           },
       }();
     }).toList();
