@@ -86,7 +86,7 @@ abstract interface class ${fileNameCases.className} {
 class $arbLanguageLocalizationsClassName {
   $arbLanguageLocalizationsClassName({
 """;
-    final classRequirements = schemas.requiredFields();
+    final classRequirements = schemas.requiredFields(isForMerge);
     final classFinals =
         "${schemas.finalFields(isForMerge: isForMerge)}\n${isForMerge ? "Map<String, dynamic> get jsonMerge => _json;" : ""}";
 
@@ -102,7 +102,8 @@ $arbLanguageLocalizationsClassName updateFromMerge(${arbLanguageLocalizationsCla
   return $arbLanguageLocalizationsClassName(
        json:_json
           ..updateAll(
-            (key, value) => merge.jsonMerge[key],
+             (key, value) =>
+              merge.jsonMerge[key] != null ? merge.jsonMerge[key] : value,
           )
   );
 }
@@ -139,26 +140,49 @@ extension SchemasToFinalFields on List<ArbSchemaCreation> {
             """import "${fatherName}_divisions/${e.title.toSnakeCase()}.dart";""",
       )
       .join('\n');
-  String requiredFields() {
+  String requiredFields(bool isForMerge) {
     final instantiations = map((e) {
       return switch (e) {
         ArbRefCreation() => () {
             return e.type.resolve(
               onSimple: () =>
-                  "${e.title} = json['${e.title.toLowerCamelCase()}'] as String",
-              onMultiChoice: () =>
-                  "${e.title} = MultiChoiceLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)",
-              onMultiChoiceReplacements: () =>
-                  "${e.title} = MultiChoiceReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)",
-              onReplacements: () =>
-                  "${e.title} = ReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)",
-              onReplacementsList: () =>
-                  "${e.title} = ReplacementsListLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)",
-              onList: () =>
-                  "${e.title} = (json['${e.title.toLowerCamelCase()}'] as List<dynamic>).map((e) => e as String).toList()",
+                  "${e.title} = json['${e.title.toLowerCamelCase()}'] as ${isForMerge ? 'String?' : 'String'}",
+              onMultiChoice: () {
+                if (isForMerge) {
+                  return "${e.title} = json['${e.title.toLowerCamelCase()}'] is Map<String, dynamic> ?  MultiChoiceLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,): null";
+                }
+                return "${e.title} = MultiChoiceLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)";
+              },
+              onMultiChoiceReplacements: () {
+                if (isForMerge) {
+                  return "${e.title} = json['${e.title.toLowerCamelCase()}'] is Map<String, dynamic> ?  MultiChoiceReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,): null";
+                }
+                return "${e.title} = MultiChoiceReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)";
+              },
+              onReplacements: () {
+                if (isForMerge) {
+                  return "${e.title} = json['${e.title.toLowerCamelCase()}'] is Map<String, dynamic> ?  ReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,): null";
+                }
+                return "${e.title} = ReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)";
+              },
+              onReplacementsList: () {
+                if (isForMerge) {
+                  return "${e.title} = json['${e.title.toLowerCamelCase()}'] is Map<String, dynamic> ?  ReplacementsListLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,): null";
+                }
+                return "${e.title} = ReplacementsListLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)";
+              },
+              onList: () {
+                if (isForMerge) {
+                  return "${e.title} = (json['${e.title.toLowerCamelCase()}'] as List<dynamic>?)?.map((e) => e as String).toList()";
+                }
+                return "${e.title} = (json['${e.title.toLowerCamelCase()}'] as List<dynamic>).map((e) => e as String).toList()";
+              },
             );
           },
         ArbObjectCreation() => () {
+            if (isForMerge) {
+              return "${e.title.toLowerCamelCase()} = json['${e.title.toLowerCamelCase()}'] is Map<String, dynamic> ?  ${e.title}(json: json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,): null";
+            }
             return "${e.title.toLowerCamelCase()} = ${e.title}(json: json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)";
           },
       }();
@@ -215,13 +239,14 @@ extension SchemasToFinalFields on List<ArbSchemaCreation> {
 
           final fileName =
               "${classDir.path}/${(title.toSnakeCase() ?? 'empty')}";
+          const isForMerge = false;
 
           final classContent = """
 import 'package:coollocalizations/coollocalizations.dart';
   final class $title{
     $title({
-    ${e.fields.requiredFields().replaceFirst("_json=json,", '')}
-    ${e.fields.finalFields(isForMerge: false).replaceFirst("final Map<String, dynamic> _json;", '')}
+    ${e.fields.requiredFields(isForMerge).replaceFirst("_json=json,", '')}
+    ${e.fields.finalFields(isForMerge: isForMerge).replaceFirst("final Map<String, dynamic> _json;", '')}
 
   }
 """;
