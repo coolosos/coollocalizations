@@ -86,7 +86,7 @@ abstract interface class ${fileNameCases.className} {
 class $arbLanguageLocalizationsClassName {
   $arbLanguageLocalizationsClassName({
 """;
-    final classRequirements = schemas.requiredFields();
+    final classRequirements = schemas.requiredFields(isForMerge);
     final classFinals =
         "${schemas.finalFields(isForMerge: isForMerge)}\n${isForMerge ? "Map<String, dynamic> get jsonMerge => _json;" : ""}";
 
@@ -139,27 +139,31 @@ extension SchemasToFinalFields on List<ArbSchemaCreation> {
             """import "${fatherName}_divisions/${e.title.toSnakeCase()}.dart";""",
       )
       .join('\n');
-  String requiredFields() {
+  String requiredFields(bool isForMerge) {
     final instantiations = map((e) {
       return switch (e) {
         ArbRefCreation() => () {
             return e.type.resolve(
               onSimple: () =>
-                  "${e.title} = json['${e.title.toLowerCamelCase()}'] as String",
+                  "${e.title} = json['${e.title.toLowerCamelCase()}'] as ${isForMerge ? 'String?' : 'String'}",
               onMultiChoice: () =>
-                  "${e.title} = MultiChoiceLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)",
+                  "${e.title} = MultiChoiceLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as ${isForMerge ? 'Map<String, dynamic>?' : 'Map<String, dynamic>'},)",
               onMultiChoiceReplacements: () =>
-                  "${e.title} = MultiChoiceReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)",
+                  "${e.title} = MultiChoiceReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as ${isForMerge ? 'Map<String, dynamic>?' : 'Map<String, dynamic>'},)",
               onReplacements: () =>
-                  "${e.title} = ReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)",
+                  "${e.title} = ReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as ${isForMerge ? 'Map<String, dynamic>?' : 'Map<String, dynamic>'},)",
               onReplacementsList: () =>
-                  "${e.title} = ReplacementsListLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)",
-              onList: () =>
-                  "${e.title} = (json['${e.title.toLowerCamelCase()}'] as List<dynamic>).map((e) => e as String).toList()",
+                  "${e.title} = ReplacementsListLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as ${isForMerge ? 'Map<String, dynamic>?' : 'Map<String, dynamic>'},)",
+              onList: () {
+                if (isForMerge) {
+                  return "${e.title} = (json['${e.title.toLowerCamelCase()}'] as List<dynamic>?)?.map((e) => e as String).toList()";
+                }
+                return "${e.title} = (json['${e.title.toLowerCamelCase()}'] as List<dynamic>).map((e) => e as String).toList()";
+              },
             );
           },
         ArbObjectCreation() => () {
-            return "${e.title.toLowerCamelCase()} = ${e.title}(json: json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)";
+            return "${e.title.toLowerCamelCase()} = ${e.title}(json: json['${e.title.toLowerCamelCase()}'] as ${isForMerge ? 'Map<String, dynamic>?' : 'Map<String, dynamic>'},)";
           },
       }();
     }).toList();
@@ -215,13 +219,14 @@ extension SchemasToFinalFields on List<ArbSchemaCreation> {
 
           final fileName =
               "${classDir.path}/${(title.toSnakeCase() ?? 'empty')}";
+          const isForMerge = false;
 
           final classContent = """
 import 'package:coollocalizations/coollocalizations.dart';
   final class $title{
     $title({
-    ${e.fields.requiredFields().replaceFirst("_json=json,", '')}
-    ${e.fields.finalFields(isForMerge: false).replaceFirst("final Map<String, dynamic> _json;", '')}
+    ${e.fields.requiredFields(isForMerge).replaceFirst("_json=json,", '')}
+    ${e.fields.finalFields(isForMerge: isForMerge).replaceFirst("final Map<String, dynamic> _json;", '')}
 
   }
 """;
