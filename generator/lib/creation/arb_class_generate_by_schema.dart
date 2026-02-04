@@ -102,7 +102,8 @@ $arbLanguageLocalizationsClassName updateFromMerge(${arbLanguageLocalizationsCla
   return $arbLanguageLocalizationsClassName(
        json:_json
           ..updateAll(
-            (key, value) => merge.jsonMerge[key],
+             (key, value) =>
+              merge.jsonMerge[key] != null ? merge.jsonMerge[key] : value,
           )
   );
 }
