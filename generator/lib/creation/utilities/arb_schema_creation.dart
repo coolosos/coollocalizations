@@ -47,12 +47,26 @@ enum ArbObjectType {
       ArbObjectType.list => onList.call(),
     };
   }
+
+  String get dartType => switch (this) {
+    ArbObjectType.simple => 'String',
+    ArbObjectType.multiChoice => 'MultiChoiceLocalizations',
+    ArbObjectType.multiChoiceReplacements =>
+      'MultiChoiceReplacementsLocalizations',
+    ArbObjectType.replacements => 'ReplacementsLocalizations',
+    ArbObjectType.replacementsList => 'ReplacementsListLocalizations',
+    ArbObjectType.list => 'List<String>',
+  };
 }
 
 final class ArbRefCreation extends ArbSchemaCreation {
   const new({required super.key, required this.type});
 
   final ArbObjectType type;
+
+  @override
+  String dartType({required bool isForMerge}) =>
+      '${type.dartType}${isForMerge ? '?' : ''}';
 }
 
 final class ArbObjectCreation extends ArbSchemaCreation {
@@ -66,10 +80,16 @@ final class ArbObjectCreation extends ArbSchemaCreation {
   final String className;
 
   final List<ArbSchemaCreation> fields;
+
+  @override
+  String dartType({required bool isForMerge}) =>
+      '$className${isForMerge ? '?' : ''}';
 }
 
 sealed class ArbSchemaCreation {
   const new({required this.key});
+
+  String dartType({required bool isForMerge});
 
   static ArbSchemaCreation? fromMapEntry(MapEntry<String, dynamic> entry) {
     final valueMap = asJsonMap(

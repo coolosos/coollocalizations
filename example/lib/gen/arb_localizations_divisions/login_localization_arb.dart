@@ -8,14 +8,16 @@
 import 'package:coollocalizations/coollocalizations.dart';
 
 final class LoginLocalizationArb {
-  new({required Map<String, dynamic> json})
-    : helloLoginL10n = json['helloLoginL10n'] as String,
-      multiChoiceL10n = MultiChoiceReplacementsLocalizations.fromJson(
-        json['multiChoiceL10n'] as Map<String, dynamic>,
-      ),
-      helloLoginL10n1 = json['helloLoginL10n1'] as String;
+  new({required this._json});
 
-  final String helloLoginL10n;
-  final MultiChoiceReplacementsLocalizations multiChoiceL10n;
-  final String helloLoginL10n1;
+  final Map<String, dynamic> _json;
+
+  String get helloLoginL10n => _json['helloLoginL10n'] as String;
+
+  MultiChoiceReplacementsLocalizations get multiChoiceL10n =>
+      MultiChoiceReplacementsLocalizations.fromJson(
+        _json['multiChoiceL10n'] as Map<String, dynamic>,
+      );
+
+  String get helloLoginL10n1 => _json['helloLoginL10n1'] as String;
 }

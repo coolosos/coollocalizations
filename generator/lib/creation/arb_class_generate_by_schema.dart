@@ -90,10 +90,16 @@ abstract interface class ${fileNameCases.className} {
     final classInitialization =
         '''
 class $arbLanguageLocalizationsClassName {
-  new({required Map<String, dynamic> json})''';
-    final classRequirements = schemas.requiredFields(isForMerge: isForMerge);
-    final classFinals =
-        '${schemas.finalFields(isForMerge: isForMerge)}\n${isForMerge ? 'Map<String, dynamic> get jsonMerge => _json;' : ''}';
+  new({required this._json});
+
+''';
+    final classFields = isForMerge
+        ? '''
+  Map<String, dynamic> get jsonMerge => _json;
+
+'''
+        : '';
+    final classGetters = schemas.getters(isForMerge: isForMerge);
 
     final fromJson =
         '''
@@ -106,7 +112,7 @@ class $arbLanguageLocalizationsClassName {
         : '''
   $arbLanguageLocalizationsClassName updateFromMerge(${arbLanguageLocalizationsClassName}Merge merge){
     return $arbLanguageLocalizationsClassName(
-      json:_json
+      json: Map<String, dynamic>.of(_json)
         ..updateAll(
           (key, value) => merge.jsonMerge[key] ?? value,
         )
@@ -117,7 +123,7 @@ class $arbLanguageLocalizationsClassName {
 
     await writeFileEnsuringDirectory(
       resultFile,
-      '$generateCodeExplanation$imports$localizationListObject$classInitialization$classRequirements\n$fromJson$classFinals\n$fromMergeLocalizations}\n',
+      '$generateCodeExplanation$imports$localizationListObject$classInitialization$fromJson  final Map<String, dynamic> _json;\n\n$classFields$classGetters\n\n$fromMergeLocalizations}\n',
     );
 
     if (!isForMerge) {
@@ -130,7 +136,7 @@ class $arbLanguageLocalizationsClassName {
   }
 }
 
-extension SchemasToFinalFields on List<ArbSchemaCreation> {
+extension SchemasToGetters on List<ArbSchemaCreation> {
   List<String> exportDivisions(
     String fatherName,
   ) => whereType<ArbObjectCreation>()
@@ -149,77 +155,52 @@ extension SchemasToFinalFields on List<ArbSchemaCreation> {
       )
       .toList()
       .sorted();
-  String requiredFields({
-    required bool isForMerge,
-    bool includeJsonField = true,
-  }) {
-    final instantiations = map((e) {
-      return switch (e) {
-        ArbRefCreation() => () {
-          return e.type.resolve(
-            onSimple: () =>
-                "${e.key} = json['${e.key.toLowerCamelCase()}'] as ${isForMerge ? 'String?' : 'String'}",
-            onMultiChoice: () {
-              if (isForMerge) {
-                return "${e.key} = json['${e.key.toLowerCamelCase()}'] is Map<String, dynamic> ? MultiChoiceLocalizations.fromJson(json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>) : null";
-              }
-              return "${e.key} = MultiChoiceLocalizations.fromJson(json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>)";
-            },
-            onMultiChoiceReplacements: () {
-              if (isForMerge) {
-                return "${e.key} = json['${e.key.toLowerCamelCase()}'] is Map<String, dynamic> ? MultiChoiceReplacementsLocalizations.fromJson(json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>) : null";
-              }
-              return "${e.key} = MultiChoiceReplacementsLocalizations.fromJson(json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>)";
-            },
-            onReplacements: () {
-              if (isForMerge) {
-                return "${e.key} = json['${e.key.toLowerCamelCase()}'] is Map<String, dynamic> ? ReplacementsLocalizations.fromJson(json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>) : null";
-              }
-              return "${e.key} = ReplacementsLocalizations.fromJson(json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>)";
-            },
-            onReplacementsList: () {
-              if (isForMerge) {
-                return "${e.key} = json['${e.key.toLowerCamelCase()}'] is Map<String, dynamic> ? ReplacementsListLocalizations.fromJson(json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>) : null";
-              }
-              return "${e.key} = ReplacementsListLocalizations.fromJson(json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>)";
-            },
-            onList: () {
-              if (isForMerge) {
-                return "${e.key} = (json['${e.key.toLowerCamelCase()}'] as List<dynamic>?)?.map((e) => e as String).toList()";
-              }
-              return "${e.key} = (json['${e.key.toLowerCamelCase()}'] as List<dynamic>).map((e) => e as String).toList()";
-            },
-          );
-        },
-        ArbObjectCreation() => () {
-          if (isForMerge) {
-            return "${e.key} = json['${e.key.toLowerCamelCase()}'] is Map<String, dynamic> ? ${e.className}(json: json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>) : null";
-          }
-          return "${e.key} = ${e.className}(json: json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>)";
-        },
-      }();
-    }).toList();
 
-    final initializers = <String>[
-      if (includeJsonField) '_json = json',
-      ...instantiations,
-    ];
-    return ': ${initializers.join(',\n')};';
-  }
+  /// Genera un getter por propiedad, en lugar de un campo final inicializado en
+  /// el constructor. Mantiene el constructor en una sola asignacion, que es lo
+  /// que evita que dart2wasm genere una funcion mayor que el limite de WebAssembly.
+  String getters({required bool isForMerge}) {
+    final nullable = isForMerge ? '?' : '';
+    final nullAwareAccess = isForMerge ? '?' : '';
 
-  String finalFields({required bool isForMerge, bool includeJsonField = true}) {
-    final declarations = map((e) {
-      final nullable = isForMerge ? '?' : '';
-      return switch (e) {
-        ArbRefCreation() =>
-          () =>
-              'final ${e.type.resolve(onSimple: () => 'String', onMultiChoice: () => 'MultiChoiceLocalizations', onMultiChoiceReplacements: () => 'MultiChoiceReplacementsLocalizations', onReplacements: () => 'ReplacementsLocalizations', onReplacementsList: () => 'ReplacementsListLocalizations', onList: () => 'List<String>')}$nullable ${e.key}',
-        ArbObjectCreation() => () => 'final ${e.className}$nullable ${e.key}',
-      }();
-    }).join(';\n');
+    final members = map((e) {
+      final key = e.key;
+      final jsonKey = e.key.toLowerCamelCase();
+      final value = "_json['$jsonKey']";
+      final type = e.dartType(isForMerge: isForMerge);
 
-    return '$declarations;\n'
-        '${includeJsonField ? 'final Map<String, dynamic> _json;' : ''}';
+      String parseWith(String className) => isForMerge
+          ? '$value is Map<String, dynamic>\n'
+                '    ? $className.fromJson($value as Map<String, dynamic>)\n'
+                '    : null'
+          : '$className.fromJson($value as Map<String, dynamic>)';
+
+      final body = switch (e) {
+        ArbRefCreation() => e.type.resolve(
+          onSimple: () => '$value as $type',
+          onMultiChoice: () => parseWith('MultiChoiceLocalizations'),
+          onMultiChoiceReplacements: () =>
+              parseWith('MultiChoiceReplacementsLocalizations'),
+          onReplacements: () => parseWith('ReplacementsLocalizations'),
+          onReplacementsList: () => parseWith('ReplacementsListLocalizations'),
+          onList: () =>
+              '($value as List<dynamic>$nullable)$nullAwareAccess.map((e) => e as String).toList()',
+        ),
+        ArbObjectCreation() =>
+          isForMerge
+              ? '$value is Map<String, dynamic>\n'
+                    '    ? ${e.className}(json: $value as Map<String, dynamic>)\n'
+                    '    : null'
+              : '${e.className}(json: $value as Map<String, dynamic>)',
+      };
+
+      final signature = '$type get $key =>';
+      return body.contains('\n')
+          ? '$signature\n    $body;'
+          : '$signature $body;';
+    });
+
+    return members.join('\n\n');
   }
 
   Future<void> classGeneration(String generatorPath, String fatherName) async {
@@ -247,9 +228,11 @@ extension SchemasToFinalFields on List<ArbSchemaCreation> {
 import 'package:coollocalizations/coollocalizations.dart';
 
 final class $className {
-  new({required Map<String, dynamic> json})${e.fields.requiredFields(isForMerge: isForMerge, includeJsonField: false)}
+  new({required this._json});
 
-  ${e.fields.finalFields(isForMerge: isForMerge, includeJsonField: false).trim()}
+  final Map<String, dynamic> _json;
+
+${e.fields.getters(isForMerge: isForMerge)}
 }
 ''';
         final file = File('$fileName.dart');

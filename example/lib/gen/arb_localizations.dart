@@ -19,28 +19,29 @@ abstract interface class ArbLocalizations {
 }
 
 class LanguageLocalization {
-  new({required Map<String, dynamic> json})
-    : _json = json,
-      locale = json['locale'] as String,
-      homeWelcomeMessage = MultiChoiceReplacementsLocalizations.fromJson(
-        json['homeWelcomeMessage'] as Map<String, dynamic>,
-      ),
-      landingPackHelpTitle = json['landingPackHelpTitle'] as String,
-      loginL10n = LoginLocalizationArb(
-        json: json['loginL10n'] as Map<String, dynamic>,
-      );
+  new({required this._json});
+
   factory fromJson(Map<String, dynamic> json) =>
       LanguageLocalization(json: json);
 
-  final String locale;
-  final MultiChoiceReplacementsLocalizations homeWelcomeMessage;
-  final String landingPackHelpTitle;
-  final LoginLocalizationArb loginL10n;
   final Map<String, dynamic> _json;
+
+  String get locale => _json['locale'] as String;
+
+  MultiChoiceReplacementsLocalizations get homeWelcomeMessage =>
+      MultiChoiceReplacementsLocalizations.fromJson(
+        _json['homeWelcomeMessage'] as Map<String, dynamic>,
+      );
+
+  String get landingPackHelpTitle => _json['landingPackHelpTitle'] as String;
+
+  LoginLocalizationArb get loginL10n =>
+      LoginLocalizationArb(json: _json['loginL10n'] as Map<String, dynamic>);
 
   LanguageLocalization updateFromMerge(LanguageLocalizationMerge merge) {
     return LanguageLocalization(
-      json: _json..updateAll((key, value) => merge.jsonMerge[key] ?? value),
+      json: Map<String, dynamic>.of(_json)
+        ..updateAll((key, value) => merge.jsonMerge[key] ?? value),
     );
   }
 }
