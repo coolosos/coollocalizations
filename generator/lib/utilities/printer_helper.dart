@@ -4,9 +4,10 @@ export 'extension.dart';
 mixin class PrinterHelper {
   void title(String title) {
     print(
-      title
-          .toUpperCase()
-          .colorizeMessage(PrinterStringColor.magenta, emoji: '✨'),
+      title.toUpperCase().colorizeMessage(
+        PrinterStringColor.magenta,
+        emoji: '✨',
+      ),
     );
   }
 

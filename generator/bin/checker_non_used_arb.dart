@@ -1,46 +1,43 @@
-// ignore_for_file: avoid_print
-
 import 'dart:async';
 import 'dart:io';
 
-import 'package:args/args.dart';
 import 'package:coollocalizations_generator/checker/non_used/checker_non_used_arguments.dart';
 import 'package:coollocalizations_generator/checker/non_used/checker_non_used_keys.dart';
+import 'package:coollocalizations_generator/utilities/argument_reader.dart';
 import 'package:coollocalizations_generator/utilities/printer_helper.dart';
-
-import 'package:path/path.dart' as path;
+import 'package:path/path.dart' as p;
 
 Future<void> main(List<String> arguments) async {
   try {
-    final ArgParser parser = CheckerNonUsedArguments().parser;
+    final parser = CheckerNonUsedArguments().parser;
 
     if (arguments.isNotEmpty && arguments[0] == 'help') {
       stdout.writeln(parser.usage);
       return;
     }
 
-    final ArgResults result = parser.parse(arguments);
+    final result = parser.parse(arguments);
 
-    final File schemaFile = File(
-      path.canonicalize(
-        path.absolute(
-          result[CheckerNonUsedArguments.arbSchema],
-        ),
+    final schemaFile = File(
+      p.canonicalize(
+        p.absolute(readStringArg(result, CheckerNonUsedArguments.arbSchema)),
       ),
     );
 
-    final List<Future> generatorAwaitList = [];
+    final generatorAwaitList = <Future<void>>[];
 
-    final String className =
-        result[CheckerNonUsedArguments.outputFileLocalization];
+    final className = readStringArg(
+      result,
+      CheckerNonUsedArguments.outputFileLocalization,
+    );
 
     final checkerNonUsedFiles = CheckerNonUsedKeys(
       schemaFile: schemaFile,
-      resultFile: File("$className.txt"),
+      resultFile: File('$className.txt'),
       searchDirectory: Directory(
-        path.canonicalize(
-          path.absolute(
-            result[CheckerNonUsedArguments.searchDirectory],
+        p.canonicalize(
+          p.absolute(
+            readStringArg(result, CheckerNonUsedArguments.searchDirectory),
           ),
         ),
       ),

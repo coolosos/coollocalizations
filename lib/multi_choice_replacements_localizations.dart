@@ -1,18 +1,14 @@
-import 'extension/replace_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-part "multi_choice_replacements_localizations.g.dart";
+import 'extension/replace_extension.dart';
+
+part 'multi_choice_replacements_localizations.g.dart';
 
 @JsonSerializable()
 class MultiChoiceReplacementsLocalizations {
-  const MultiChoiceReplacementsLocalizations({
-    required this.definition,
-    required this.dateTimeReplacements,
-  });
+  const new({required this.definition, required this.dateTimeReplacements});
 
-  factory MultiChoiceReplacementsLocalizations.fromJson(
-    Map<String, dynamic> json,
-  ) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$MultiChoiceReplacementsLocalizationsFromJson(json);
 
   final Map<String, dynamic> definition;
@@ -29,10 +25,7 @@ class MultiChoiceReplacementsLocalizations {
             '')
         .toString()
         .substitute(
-          substitutes.formatDateTime(
-            dateTimeReplacements,
-            locale: locale,
-          ),
+          substitutes.formatDateTime(dateTimeReplacements, locale: locale),
         );
   }
 }

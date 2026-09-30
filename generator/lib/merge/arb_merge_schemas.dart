@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:collection/collection.dart';
 
+import '../utilities/directory_management.dart';
+import '../utilities/json_decoder.dart';
 import '../utilities/printer_helper.dart';
 
 enum TypologyMerge {
@@ -16,12 +19,13 @@ enum TypologyMerge {
   }
 }
 
-final class ArbMergeSchemas with PrinterHelper {
-  const ArbMergeSchemas({
+final class ArbMergeSchemas with PrinterHelper, DirectoryManagement {
+  const new({
     required this.allLocalizations,
     required this.mergeLocalizations,
     required this.outputFile,
     required this.typology,
+    this.additionalReplacements = const <String, String>{},
   });
 
   final File allLocalizations;
@@ -31,34 +35,45 @@ final class ArbMergeSchemas with PrinterHelper {
 
   final TypologyMerge typology;
 
+  /// Reemplazos globales adicionales, con el formato `palabra:reemplazo`.
+  final Map<String, String> additionalReplacements;
+
   Future<void> run() async {
-    title("Merge Json");
+    title('Merge Json');
     print(
-      "Reading common json"
-          .colorizeMessage(PrinterStringColor.yellow, emoji: "🔛"),
+      'Reading common json'.colorizeMessage(
+        PrinterStringColor.yellow,
+        emoji: '🔛',
+      ),
     );
-    final String all = await allLocalizations.readAsString();
-    Map<String, dynamic> allJson = json.decode(all);
+    final all = await allLocalizations.readAsString();
+    final allJson = decodeJsonMap(all, context: 'all localizations file');
     print(
-      "Reading merge json"
-          .colorizeMessage(PrinterStringColor.yellow, emoji: "🔛"),
+      'Reading merge json'.colorizeMessage(
+        PrinterStringColor.yellow,
+        emoji: '🔛',
+      ),
     );
     final merge = await mergeLocalizations.readAsString();
-    final Map<String, dynamic> mergeJson = json.decode(merge);
+    final mergeJson = decodeJsonMap(merge, context: 'merge localizations file');
     print(
-      "Reading replacements in merge json"
-          .colorizeMessage(PrinterStringColor.yellow, emoji: "🔛"),
+      'Reading replacements in merge json'.colorizeMessage(
+        PrinterStringColor.yellow,
+        emoji: '🔛',
+      ),
     );
     final replacements = _obtainReplacement(mergeJson);
 
-    if (mergeJson['checkSchema'] != null) {
-      allJson['\$schema'] = mergeJson['checkSchema'];
+    final checkSchema = mergeJson['checkSchema'];
+    if (checkSchema is String) {
+      allJson[r'$schema'] = checkSchema;
     }
     final fromLocalization = obtainLocalizations(mergeJson, allJson);
 
     if (fromLocalization case final fromLocalization?) {
-      final value =
-          List<Map<String, dynamic>>.from(fromLocalization.commonLocalization);
+      final value = List<Map<String, dynamic>>.from(
+        fromLocalization.commonLocalization,
+      );
       _replaceByLocalizationListSchema(
         value,
         fromLocalization.replacementLocalization,
@@ -69,13 +84,17 @@ final class ArbMergeSchemas with PrinterHelper {
       _replaceByMatchKeys(mergeJson, allJson);
     }
 
-    var encoder = const JsonEncoder.withIndent("  ");
+    const encoder = JsonEncoder.withIndent('  ');
 
-    String fileAsString = encoder.convert(allJson);
+    var fileAsString = encoder.convert(allJson);
 
-    if (replacements.replacement case final replacements
-        when replacements.isNotEmpty) {
-      for (var map in replacements) {
+    for (final entry in additionalReplacements.entries) {
+      fileAsString = fileAsString.replaceAll(entry.key, entry.value);
+    }
+
+    if (replacements.replacement case final globalReplacements
+        when globalReplacements.isNotEmpty) {
+      for (final map in globalReplacements) {
         final word = map['word'];
         final replacement = map['replacement'];
         if (word is String && replacement is String) {
@@ -84,50 +103,54 @@ final class ArbMergeSchemas with PrinterHelper {
       }
     }
 
-    outputFile.writeAsStringSync(fileAsString);
+    await writeFileEnsuringDirectory(outputFile, fileAsString);
     print(
-      "Creation file success"
-          .colorizeMessage(PrinterStringColor.green, emoji: "✨"),
+      'Creation file success'.colorizeMessage(
+        PrinterStringColor.green,
+        emoji: '✨',
+      ),
     );
   }
 
   ({
     List<Map<String, dynamic>> localeReplacement,
-    List<Map<String, dynamic>> replacement
-  }) _obtainReplacement(
-    Map<String, dynamic> mergeJson,
-  ) {
-    final List<dynamic>? dynamicReplacements = mergeJson['replacement'];
-    final replacements =
-        dynamicReplacements?.whereType<Map<String, dynamic>>() ?? [];
+    List<Map<String, dynamic>> replacement,
+  })
+  _obtainReplacement(Map<String, dynamic> mergeJson) {
+    final dynamicReplacements = mergeJson['replacement'];
+    final replacements = dynamicReplacements is List<Object?>
+        ? dynamicReplacements.whereType<Map<String, dynamic>>().toList()
+        : <Map<String, dynamic>>[];
 
     final groupByLocalesAndNoLocales = replacements.groupListsBy(
-      (element) {
-        final locales = element['locales'];
-        return locales != null && locales is List;
-      },
+      (element) => element['locales'] is List<Object?>,
     );
 
     return (
-      localeReplacement: groupByLocalesAndNoLocales[true] ?? [],
-      replacement: groupByLocalesAndNoLocales[false] ?? []
+      localeReplacement:
+          groupByLocalesAndNoLocales[true] ?? const <Map<String, dynamic>>[],
+      replacement:
+          groupByLocalesAndNoLocales[false] ?? const <Map<String, dynamic>>[],
     );
   }
 
   ({
     List<Map<String, dynamic>> commonLocalization,
     List<Map<String, dynamic>> replacementLocalization,
-  })? obtainLocalizations(
+  })?
+  obtainLocalizations(
     Map<String, dynamic> mergeJson,
     Map<String, dynamic> allJson,
   ) {
     try {
-      final allLocalizations = (allJson['localizations'] as List)
-          .whereType<Map<String, dynamic>>()
-          .toList();
-      final mergeLocalizations = (mergeJson['localizations'] as List)
-          .whereType<Map<String, dynamic>>()
-          .toList();
+      final allLocalizations = asJsonList(
+        allJson['localizations'],
+        context: 'all localizations',
+      ).whereType<Map<String, dynamic>>().toList();
+      final mergeLocalizations = asJsonList(
+        mergeJson['localizations'],
+        context: 'merge localizations',
+      ).whereType<Map<String, dynamic>>().toList();
 
       final locale = allLocalizations.any(
         (element) => element['locale'] == null,
@@ -140,8 +163,8 @@ final class ArbMergeSchemas with PrinterHelper {
 
         if (otherContainsLocale) {
           print(
-            "Warning: Maybe you have localizations without locale key, this break the json schema arb_localization for localization. If your merge if not from localization you can ignore this warning"
-                .colorizeMessage(PrinterStringColor.yellow, emoji: "🚨"),
+            'Warning: Maybe you have localizations without locale key, this break the json schema arb_localization for localization. If your merge if not from localization you can ignore this warning'
+                .colorizeMessage(PrinterStringColor.yellow, emoji: '🚨'),
           );
         }
         throw UnsupportedError(
@@ -151,7 +174,7 @@ final class ArbMergeSchemas with PrinterHelper {
 
       return (
         commonLocalization: allLocalizations,
-        replacementLocalization: mergeLocalizations
+        replacementLocalization: mergeLocalizations,
       );
     } catch (e) {
       if (typology == TypologyMerge.localization) {
@@ -166,10 +189,12 @@ final class ArbMergeSchemas with PrinterHelper {
     Map<String, dynamic> allJson,
   ) {
     print(
-      "Proceeded to change match keys"
-          .colorizeMessage(PrinterStringColor.magenta, emoji: "🔛"),
+      'Proceeded to change match keys'.colorizeMessage(
+        PrinterStringColor.magenta,
+        emoji: '🔛',
+      ),
     );
-    for (var merges in mergeJson.entries) {
+    for (final merges in mergeJson.entries) {
       allJson.update(
         merges.key,
         (value) => merges.value,
@@ -186,12 +211,11 @@ final class ArbMergeSchemas with PrinterHelper {
     required List<Map<String, dynamic>> replacementWithLocale,
   }) {
     print(
-      "Localizations find, proceeded to change internal localizations"
-          .colorizeMessage(PrinterStringColor.magenta, emoji: "🔛"),
+      'Localizations find, proceeded to change internal localizations'
+          .colorizeMessage(PrinterStringColor.magenta, emoji: '🔛'),
     );
 
-    for (int i = 0; i < mergeLocalizations.length; i++) {
-      final mergeInternal = mergeLocalizations[i];
+    for (final mergeInternal in mergeLocalizations) {
       final internalLocale = mergeInternal['locale'];
 
       final internalLocalizationWithAllLocalizations = allLocalizations
@@ -221,45 +245,60 @@ final class ArbMergeSchemas with PrinterHelper {
     List<Map<String, dynamic>> replacementWithLocale,
     List<Map<String, dynamic>> allLocalizations,
   ) {
-    if (replacementWithLocale.isNotEmpty) {
-      final allLocaleWIthOutReplacements =
-          List<Map<String, dynamic>>.from(allLocalizations);
-      allLocalizations.removeWhere(
-        (element) => true,
+    if (replacementWithLocale.isEmpty) {
+      return;
+    }
+
+    final allLocaleWIthOutReplacements = List<Map<String, dynamic>>.from(
+      allLocalizations,
+    );
+    allLocalizations.clear();
+
+    for (final localizationByLocale in allLocaleWIthOutReplacements) {
+      final internalLocale = asJsonString(
+        localizationByLocale['locale'],
+        context: 'locale of $localizationByLocale',
       );
 
-      for (var localizationByLocale in allLocaleWIthOutReplacements) {
-        final internalLocale = localizationByLocale['locale'] as String;
-
-        final replacementOfInternalLocale = replacementWithLocale.where(
-          (element) {
-            if (element['locales'] case final locales? when locales is List) {
-              return (locales.contains(internalLocale) &&
-                  element['word'] is String &&
-                  element['replacement'] is String);
-            }
-            return false;
-          },
-        ).toList();
-
-        if (replacementOfInternalLocale.isNotEmpty) {
-          String mapToStringConverter = json.encode(localizationByLocale);
-          for (var replacement in replacementOfInternalLocale) {
-            final word = replacement['word'] as String;
-            final replacementWord = replacement['replacement'] as String;
-            final data = mapToStringConverter.replaceAll(
-              word,
-              replacementWord,
-            );
-
-            mapToStringConverter = data;
-          }
-
-          allLocalizations.add(json.decode(mapToStringConverter));
-        } else {
-          allLocalizations.add(localizationByLocale);
+      final replacementOfInternalLocale = replacementWithLocale.where((
+        element,
+      ) {
+        final locales = element['locales'];
+        if (locales is List<Object?>) {
+          return locales.contains(internalLocale) &&
+              element['word'] is String &&
+              element['replacement'] is String;
         }
+        return false;
+      }).toList();
+
+      if (replacementOfInternalLocale.isEmpty) {
+        allLocalizations.add(localizationByLocale);
+        continue;
       }
+
+      var mapToStringConverter = json.encode(localizationByLocale);
+      for (final replacement in replacementOfInternalLocale) {
+        final word = asJsonString(
+          replacement['word'],
+          context: 'word of $replacement',
+        );
+        final replacementWord = asJsonString(
+          replacement['replacement'],
+          context: 'replacement of $replacement',
+        );
+        mapToStringConverter = mapToStringConverter.replaceAll(
+          word,
+          replacementWord,
+        );
+      }
+
+      allLocalizations.add(
+        decodeJsonMap(
+          mapToStringConverter,
+          context: 'replaced $internalLocale',
+        ),
+      );
     }
   }
 
@@ -272,28 +311,33 @@ final class ArbMergeSchemas with PrinterHelper {
     allLocalizations.removeWhere(
       (element) => element == internalLocalizationWithAllLocalizations,
     );
-    for (var merges in mergeInternal.entries) {
+    for (final merges in mergeInternal.entries) {
       internalLocalizationWithAllLocalizations.update(
         merges.key,
         (value) {
           print(
-            "Update {${merges.key}:${merges.value}.}"
-                .colorizeMessage(PrinterStringColor.green, emoji: "✅"),
+            'Update {${merges.key}:${merges.value}.}'.colorizeMessage(
+              PrinterStringColor.green,
+              emoji: '✅',
+            ),
           );
-          if (merges.value case final complexValues when complexValues is Map) {
-            final entryToOverride =
-                internalLocalizationWithAllLocalizations.entries.firstWhere(
-              (element) => element.key == merges.key,
+          final complexValues = merges.value;
+          if (complexValues is Map<String, dynamic>) {
+            final entryToOverride = internalLocalizationWithAllLocalizations
+                .entries
+                .firstWhere((element) => element.key == merges.key);
+            final valueToOverride = asJsonMap(
+              entryToOverride.value,
+              context: 'value of ${merges.key}',
             );
-            final valueToOverride = entryToOverride.value as Map;
-            for (var internalValues in complexValues.entries) {
+            for (final internalValues in complexValues.entries) {
               valueToOverride.update(
                 internalValues.key,
                 (value) => internalValues.value,
                 ifAbsent: () {
                   print(
-                    "Added ${merges.key} with value ${merges.value}. This key doesn't exist in the previous json"
-                        .colorizeMessage(PrinterStringColor.red, emoji: "🚨"),
+                    r"Added ${merges.key} with value ${merges.value}. This key doesn't exist in the previous json"
+                        .colorizeMessage(PrinterStringColor.red, emoji: '🚨'),
                   );
 
                   return internalValues.value;
@@ -307,8 +351,8 @@ final class ArbMergeSchemas with PrinterHelper {
         },
         ifAbsent: () {
           print(
-            "Added ${merges.key} with value ${merges.value}. This key doesn't exist in the previous json"
-                .colorizeMessage(PrinterStringColor.red, emoji: "🚨"),
+            r"Added ${merges.key} with value ${merges.value}. This key doesn't exist in the previous json"
+                .colorizeMessage(PrinterStringColor.red, emoji: '🚨'),
           );
 
           return merges.value;

@@ -1,9 +1,6 @@
 extension Formatter on String {
-  String colorizeMessage(
-    PrinterStringColor color, {
-    required String emoji,
-  }) =>
-      "$emoji ${color.color}$this${PrinterStringColor.reset.color}";
+  String colorizeMessage(PrinterStringColor color, {required String emoji}) =>
+      '$emoji ${color.color}$this${PrinterStringColor.reset.color}';
 }
 
 enum PrinterStringColor {
@@ -15,10 +12,9 @@ enum PrinterStringColor {
   blue(color: '\x1B[34m'),
   magenta(color: '\x1B[35m'),
   cyan(color: '\x1B[36m'),
-  white(color: '\x1B[37m'),
-  ;
+  white(color: '\x1B[37m');
 
-  const PrinterStringColor({required this.color});
+  new({required this.color});
 
   final String color;
 }

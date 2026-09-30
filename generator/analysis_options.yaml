@@ -1,0 +1,6 @@
+# El paquete generator es una CLI: el uso de `print` para mostrar el progreso y
+# los títulos es intencionado, no un descuido.
+include: package:coolint/dart.yaml
+linter:
+  rules:
+    avoid_print: false
