@@ -1,5 +1,9 @@
 import '../../utilities/json_decoder.dart';
 
+/// Añade el sufijo `?` que llevan los tipos de la variante de merge.
+String _nullableType(String type, bool isForMerge) =>
+    isForMerge ? '$type?' : type;
+
 enum ArbObjectType {
   simple,
   multiChoice,
@@ -30,25 +34,8 @@ enum ArbObjectType {
     return simple;
   }
 
-  T resolve<T>({
-    required T Function() onSimple,
-    required T Function() onMultiChoice,
-    required T Function() onMultiChoiceReplacements,
-    required T Function() onReplacements,
-    required T Function() onReplacementsList,
-    required T Function() onList,
-  }) {
-    return switch (this) {
-      ArbObjectType.simple => onSimple.call(),
-      ArbObjectType.multiChoice => onMultiChoice.call(),
-      ArbObjectType.multiChoiceReplacements => onMultiChoiceReplacements.call(),
-      ArbObjectType.replacements => onReplacements.call(),
-      ArbObjectType.replacementsList => onReplacementsList.call(),
-      ArbObjectType.list => onList.call(),
-    };
-  }
-
-  String get dartType => switch (this) {
+  /// Tipo Dart al que apunta una referencia de este tipo, sin nullabilidad.
+  String get dartTypeName => switch (this) {
     ArbObjectType.simple => 'String',
     ArbObjectType.multiChoice => 'MultiChoiceLocalizations',
     ArbObjectType.multiChoiceReplacements =>
@@ -62,11 +49,12 @@ enum ArbObjectType {
 final class ArbRefCreation extends ArbSchemaCreation {
   const new({required super.key, required this.type});
 
+  /// Tipo al que apunta la propiedad del schema.
   final ArbObjectType type;
 
   @override
   String dartType({required bool isForMerge}) =>
-      '${type.dartType}${isForMerge ? '?' : ''}';
+      _nullableType(type.dartTypeName, isForMerge);
 }
 
 final class ArbObjectCreation extends ArbSchemaCreation {
@@ -79,16 +67,18 @@ final class ArbObjectCreation extends ArbSchemaCreation {
   /// Nombre de la clase Dart generada, tomado del `name` del schema.
   final String className;
 
+  /// Propiedades del objeto, que se emiten en su propia clase de división.
   final List<ArbSchemaCreation> fields;
 
   @override
   String dartType({required bool isForMerge}) =>
-      '$className${isForMerge ? '?' : ''}';
+      _nullableType(className, isForMerge);
 }
 
 sealed class ArbSchemaCreation {
   const new({required this.key});
 
+  /// Tipo con el que se declara la propiedad en la clase generada.
   String dartType({required bool isForMerge});
 
   static ArbSchemaCreation? fromMapEntry(MapEntry<String, dynamic> entry) {
