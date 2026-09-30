@@ -1,29 +1,28 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
+
+import '../utilities/json_decoder.dart';
+
 final class SchemaUpdater {
-  const SchemaUpdater({
-    required this.schemaFile,
-  });
+  const new({required this.schemaFile});
 
   final File schemaFile;
 
   Future<void> updateRequirements() async {
-    final String schemaString = await schemaFile.readAsString();
-    final Map<String, dynamic> schemaJson = json.decode(schemaString);
-    final Map<String, dynamic> schemaProperties = schemaJson["properties"];
+    final schemaString = await schemaFile.readAsString();
+    final schemaJson = decodeJsonMap(schemaString, context: 'schema file');
+    final schemaProperties = asJsonMap(
+      schemaJson['properties'],
+      context: 'schema properties',
+    );
 
-    final List<String> values = [];
-
-    for (String key in schemaProperties.keys) {
-      values.add(key);
-    }
-
-    schemaJson["required"] = values;
+    schemaJson['required'] = schemaProperties.keys.toList();
 
     _updateSchemaObject(schemaProperties);
 
-    var encoder = const JsonEncoder.withIndent("  ");
+    const encoder = JsonEncoder.withIndent('  ');
 
     schemaFile.writeAsStringSync(encoder.convert(schemaJson));
   }
@@ -33,54 +32,59 @@ final class SchemaUpdater {
     bool isForMergeSchema = false,
   }) {
     final objectSchema = schemaProperties.entries.where(
-      (element) {
-        if (element.value case final map when map is Map) {
-          if (map['properties'] case final properties? when properties is Map) {
-            return true;
-          }
-        }
-        return false;
-      },
+      (element) => element.value is Map<String, dynamic>,
     );
 
-    for (var object in objectSchema) {
-      final List<String> internalValues = [];
-      if (object.value case final value when value is Map) {
-        if (value["properties"] case final valueProperties
-            when valueProperties is Map && !isForMergeSchema) {
-          for (String key in valueProperties.keys) {
-            internalValues.add(key);
-          }
+    for (final object in objectSchema) {
+      final objectValue = object.value;
+      if (objectValue is Map<String, dynamic>) {
+        final properties = objectValue['properties'];
+        if (properties is Map<String, dynamic>) {
+          objectValue['type'] = 'object';
+          objectValue['required'] = isForMergeSchema
+              ? <String>[]
+              : properties.keys.toList();
+          schemaProperties[object.key] = objectValue;
         }
-        value["type"] = "object";
-        value["required"] = internalValues;
-        schemaProperties[object.key] = value;
       }
     }
   }
 
-  Future<void> copySchemaOnLocation({required String copyLocation}) {
-    final separatorSplits = copyLocation.split('');
-    final newCopyLocation = (separatorSplits.last.contains('/')
-            ? separatorSplits
-            : ([...separatorSplits, "/"]))
-        .join();
-    return schemaFile.copy("${newCopyLocation}localization_schema.json");
+  /// Copia el schema en [copyLocation] con el nombre `localization_schema.json`.
+  ///
+  /// [copyLocation] se interpreta como un directorio, tanto si termina en
+  /// separador como si no, y en cualquier plataforma. El directorio se crea
+  /// si no existe.
+  Future<void> copySchemaOnLocation({required String copyLocation}) async {
+    final directory = Directory(copyLocation);
+    if (!await directory.exists()) {
+      await directory.create(recursive: true);
+    }
+    await schemaFile.copy(p.join(copyLocation, 'localization_schema.json'));
   }
 
   Future<File> createMergeSchema({required String path}) async {
-    final String schemaString = await schemaFile.readAsString();
-    final Map<String, dynamic> schemaJson = json.decode(schemaString);
-    final Map<String, dynamic> schemaProperties = schemaJson["properties"];
+    final schemaString = await schemaFile.readAsString();
+    final schemaJson = decodeJsonMap(schemaString, context: 'schema file');
+    final schemaProperties = asJsonMap(
+      schemaJson['properties'],
+      context: 'schema properties',
+    );
 
-    schemaJson["required"] = [];
+    schemaJson['required'] = <String>[];
 
     _updateSchemaObject(schemaProperties, isForMergeSchema: true);
 
-    var encoder = const JsonEncoder.withIndent("  ");
+    const encoder = JsonEncoder.withIndent('  ');
 
     schemaFile.writeAsStringSync(encoder.convert(schemaJson));
 
-    return schemaFile.copy(path);
+    final destinationDirectory = Directory(p.dirname(path));
+    if (!await destinationDirectory.exists()) {
+      await destinationDirectory.create(recursive: true);
+    }
+
+    final copy = await schemaFile.copy(path);
+    return copy;
   }
 }

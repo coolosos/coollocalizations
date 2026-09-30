@@ -1,14 +1,14 @@
 name: coollocalizations
 environment:
-  sdk: ">=3.2.4 <4.0.0"
+  sdk: ">=3.13.2 <4.0.0"
 
 publish_to: none
 
 dependencies:
-  json_annotation: ^4.11.0
-  intl: any
+  intl: ^0.20.3
+  json_annotation: ^4.12.0
 
 dev_dependencies:
-  coolint: ^2.1.2
-  build_runner: any
-  json_serializable: ^6.13.0
+  build_runner: ^2.16.1
+  coolint: ^3.0.0
+  json_serializable: ^6.14.1

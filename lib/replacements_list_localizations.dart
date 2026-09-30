@@ -1,18 +1,14 @@
-import 'extension/replace_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-part "replacements_list_localizations.g.dart";
+import 'extension/replace_extension.dart';
+
+part 'replacements_list_localizations.g.dart';
 
 @JsonSerializable()
 class ReplacementsListLocalizations {
-  const ReplacementsListLocalizations({
-    required this.value,
-    required this.dateTimeReplacements,
-  });
+  const new({required this.value, required this.dateTimeReplacements});
 
-  factory ReplacementsListLocalizations.fromJson(
-    Map<String, dynamic> json,
-  ) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$ReplacementsListLocalizationsFromJson(json);
 
   final List<String> value;
@@ -23,12 +19,9 @@ class ReplacementsListLocalizations {
     required String? locale,
   }) {
     return [
-      for (var i = 0; i < value.length; i++)
-        value[i].substitute(
-          substitutesWords.formatDateTime(
-            dateTimeReplacements,
-            locale: locale,
-          ),
+      for (final text in value)
+        text.substitute(
+          substitutesWords.formatDateTime(dateTimeReplacements, locale: locale),
         ),
     ];
   }

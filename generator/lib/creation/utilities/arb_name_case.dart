@@ -1,16 +1,15 @@
 import 'dart:io';
+
 import 'package:path/path.dart' as p;
 
 final class ArbNameCase {
-  ArbNameCase({required File file})
-      : path = p.dirname(file.path),
-        name = p.basenameWithoutExtension(file.path);
+  new({required File file})
+    : path = p.dirname(file.path),
+      name = p.basenameWithoutExtension(file.path);
 
   final String path;
   final String name;
-  String get className {
-    return name.snakeCaseToCamelCase() ?? '';
-  }
+  String get className => name.snakeCaseToCamelCase() ?? '';
 }
 
 extension StringCases on String? {
@@ -20,29 +19,29 @@ extension StringCases on String? {
       return text;
     }
 
-    final String firstChar = text[0].toLowerCase();
+    final firstChar = text[0].toLowerCase();
 
-    final String restOfString = text.substring(1);
+    final restOfString = text.substring(1);
 
     return firstChar + restOfString;
   }
 
   String? toSnakeCase() {
-    final String? camelCaseString = this;
+    final camelCaseString = this;
     if (camelCaseString == null || camelCaseString.isEmpty) {
       return camelCaseString;
     }
 
-    String snakeCase = camelCaseString.replaceAllMapped(
-      RegExp(r'(?<!^)([A-Z])'),
-      (Match m) => '_${m.group(1)}',
+    final snakeCase = camelCaseString.replaceAllMapped(
+      RegExp('(?<!^)([A-Z])'),
+      (m) => '_${m.group(1)}',
     );
 
     return snakeCase.toLowerCase();
   }
 
   String? snakeCaseToCamelCase() {
-    final String? snakeCaseString = this;
+    final snakeCaseString = this;
     if (snakeCaseString == null || snakeCaseString.isEmpty) {
       return snakeCaseString;
     }

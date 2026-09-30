@@ -10,6 +10,7 @@
         }
       },
       "landingPackHelpTitle": "Help NO WORKING for landing",
+      "welcomeMessage": "Welcome message for login y lobby",
       "loginL10n": {
         "helloLoginL10n": "Hello login",
         "helloLoginL10n1": "Hello for Heldivers",

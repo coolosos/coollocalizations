@@ -1,12 +1,15 @@
-import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
+
+import '../utilities/directory_management.dart';
+import '../utilities/json_decoder.dart';
 import '../utilities/printer_helper.dart';
 import 'utilities/arb_name_case.dart';
 import 'utilities/arb_schema_creation.dart';
 
-final class ArbClassGenerateBySchema with PrinterHelper {
-  const ArbClassGenerateBySchema({
+final class ArbClassGenerateBySchema with PrinterHelper, DirectoryManagement {
+  const new({
     required this.schemaFile,
     required this.resultFile,
     required this.isForMerge,
@@ -17,259 +20,251 @@ final class ArbClassGenerateBySchema with PrinterHelper {
   final bool isForMerge;
 
   Future<void> run() async {
-    title("Cool Localizations Generator");
+    title('Cool Localizations Generator');
     print(
-      "Reading json schema"
-          .colorizeMessage(PrinterStringColor.yellow, emoji: "🔛"),
+      'Reading json schema'.colorizeMessage(
+        PrinterStringColor.yellow,
+        emoji: '🔛',
+      ),
     );
-    final String schemaString = await schemaFile.readAsString();
-    final Map<String, dynamic> schemaJson = json.decode(schemaString);
-    final Map<String, dynamic> schemaProperties = schemaJson["properties"];
+    final schemaString = await schemaFile.readAsString();
+    final schemaJson = decodeJsonMap(schemaString, context: 'schema file');
+    final schemaProperties = asJsonMap(
+      schemaJson['properties'],
+      context: 'schema properties',
+    );
 
-    final List<ArbSchemaCreation> schemas = [];
+    final schemas = <ArbSchemaCreation>[];
 
-    for (MapEntry<String, dynamic> property in schemaProperties.entries) {
+    for (final property in schemaProperties.entries) {
       if (ArbSchemaCreation.fromMapEntry(property) case final schema?) {
-        schemas.add(
-          schema,
-        );
+        schemas.add(schema);
       }
     }
 
-    final ArbNameCase fileNameCases = ArbNameCase(file: resultFile);
+    final fileNameCases = ArbNameCase(file: resultFile);
     print(
-      "Generate code".colorizeMessage(PrinterStringColor.yellow, emoji: "🔛"),
+      'Generate code'.colorizeMessage(PrinterStringColor.yellow, emoji: '🔛'),
     );
-    const generateCodeExplanation = """
-/// GENERATED CODE - DO NOT MODIFY BY HAND
-/// *****************************************************
-///  Cool Localization
-/// *****************************************************
+    const generateCodeExplanation = '''
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// *****************************************************
+//  Cool Localization
+// *****************************************************
 
 // coverage:ignore-file
-// ignore_for_file: type=lint
-// ignore_for_file: directives_ordering,unnecessary_import,implicit_dynamic_list_literal,deprecated_member_use
 
-""";
-    final importOfMerge =
-        isForMerge ? "" : "import '${fileNameCases.name}_merge.dart';";
-    final imports = """
-// ignore_for_file: non_constant_identifier_names
-
-library;
-
+''';
+    final importOfMerge = isForMerge
+        ? ''
+        : "import '${fileNameCases.name}_merge.dart';";
+    final divisionExports = isForMerge
+        ? const <String>[]
+        : schemas.exportDivisions(fileNameCases.name);
+    final directives = <String>[
+      ...schemas.importDivisions(fileNameCases.name.replaceFirst('_merge', '')),
+      if (importOfMerge.isNotEmpty) importOfMerge,
+      if (divisionExports.isNotEmpty) ...['', ...divisionExports],
+    ];
+    final imports =
+        '''
 import 'package:coollocalizations/coollocalizations.dart';
-$importOfMerge
 
-${schemas.importDivisions(
-      fileNameCases.name.replaceFirst('_merge', ''),
-    )}
-${isForMerge ? '' : schemas.exportDivisions(
-            fileNameCases.name,
-          )}
+${directives.join('\n')}
 
-""";
+''';
 
-    final String arbLanguageLocalizationsClassName =
-        isForMerge ? "LanguageLocalizationMerge" : "LanguageLocalization";
+    final arbLanguageLocalizationsClassName = isForMerge
+        ? 'LanguageLocalizationMerge'
+        : 'LanguageLocalization';
 
-    final localizationListObject = """
+    final localizationListObject =
+        '''
 abstract interface class ${fileNameCases.className} {
-  const ${fileNameCases.className}({required this.localizations});
+  const new({required this.localizations});
 
   final List<$arbLanguageLocalizationsClassName> localizations;
 }
-""";
+''';
 
-    final classInitialization = """
-
+    final classInitialization =
+        '''
 class $arbLanguageLocalizationsClassName {
-  $arbLanguageLocalizationsClassName({
-""";
-    final classRequirements = schemas.requiredFields(isForMerge);
+  new({required Map<String, dynamic> json})''';
+    final classRequirements = schemas.requiredFields(isForMerge: isForMerge);
     final classFinals =
-        "${schemas.finalFields(isForMerge: isForMerge)}\n${isForMerge ? "Map<String, dynamic> get jsonMerge => _json;" : ""}";
+        '${schemas.finalFields(isForMerge: isForMerge)}\n${isForMerge ? 'Map<String, dynamic> get jsonMerge => _json;' : ''}';
 
-    final String fromJson = """
-factory $arbLanguageLocalizationsClassName.fromJson(Map<String, dynamic> json) => $arbLanguageLocalizationsClassName(json:json);
+    final fromJson =
+        '''
+  factory fromJson(Map<String, dynamic> json) => $arbLanguageLocalizationsClassName(json:json);
 
-""";
+''';
 
-    final String fromMergeLocalizations = isForMerge
-        ? ""
-        : """
-$arbLanguageLocalizationsClassName updateFromMerge(${arbLanguageLocalizationsClassName}Merge merge){
-  return $arbLanguageLocalizationsClassName(
-       json:_json
-          ..updateAll(
-             (key, value) =>
-              merge.jsonMerge[key] != null ? merge.jsonMerge[key] : value,
-          )
-  );
-}
+    final fromMergeLocalizations = isForMerge
+        ? ''
+        : '''
+  $arbLanguageLocalizationsClassName updateFromMerge(${arbLanguageLocalizationsClassName}Merge merge){
+    return $arbLanguageLocalizationsClassName(
+      json:_json
+        ..updateAll(
+          (key, value) => merge.jsonMerge[key] ?? value,
+        )
+    );
+  }
 
-""";
+''';
 
-    resultFile.writeAsStringSync(
-      "$generateCodeExplanation$imports$localizationListObject$classInitialization$classRequirements$fromJson$classFinals$fromMergeLocalizations\n}",
+    await writeFileEnsuringDirectory(
+      resultFile,
+      '$generateCodeExplanation$imports$localizationListObject$classInitialization$classRequirements\n$fromJson$classFinals\n$fromMergeLocalizations}\n',
     );
 
     if (!isForMerge) {
-      await schemas.classGeneration(
-        fileNameCases.path,
-        fileNameCases.name,
-      );
+      await schemas.classGeneration(fileNameCases.path, fileNameCases.name);
     }
 
     print(
-      "Code Generated".colorizeMessage(PrinterStringColor.green, emoji: "✨"),
+      'Code Generated'.colorizeMessage(PrinterStringColor.green, emoji: '✨'),
     );
   }
 }
 
 extension SchemasToFinalFields on List<ArbSchemaCreation> {
-  String exportDivisions(String fatherName) => whereType<ArbObjectCreation>()
+  List<String> exportDivisions(
+    String fatherName,
+  ) => whereType<ArbObjectCreation>()
       .map(
         (e) =>
-            """export "${fatherName}_divisions/${e.title.toSnakeCase()}.dart";""",
+            """export '${fatherName}_divisions/${e.className.toSnakeCase()}.dart';""",
       )
-      .join('\n');
-  String importDivisions(String fatherName) => whereType<ArbObjectCreation>()
+      .toList()
+      .sorted();
+  List<String> importDivisions(
+    String fatherName,
+  ) => whereType<ArbObjectCreation>()
       .map(
         (e) =>
-            """import "${fatherName}_divisions/${e.title.toSnakeCase()}.dart";""",
+            """import '${fatherName}_divisions/${e.className.toSnakeCase()}.dart';""",
       )
-      .join('\n');
-  String requiredFields(bool isForMerge) {
+      .toList()
+      .sorted();
+  String requiredFields({
+    required bool isForMerge,
+    bool includeJsonField = true,
+  }) {
     final instantiations = map((e) {
       return switch (e) {
         ArbRefCreation() => () {
-            return e.type.resolve(
-              onSimple: () =>
-                  "${e.title} = json['${e.title.toLowerCamelCase()}'] as ${isForMerge ? 'String?' : 'String'}",
-              onMultiChoice: () {
-                if (isForMerge) {
-                  return "${e.title} = json['${e.title.toLowerCamelCase()}'] is Map<String, dynamic> ?  MultiChoiceLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,): null";
-                }
-                return "${e.title} = MultiChoiceLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)";
-              },
-              onMultiChoiceReplacements: () {
-                if (isForMerge) {
-                  return "${e.title} = json['${e.title.toLowerCamelCase()}'] is Map<String, dynamic> ?  MultiChoiceReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,): null";
-                }
-                return "${e.title} = MultiChoiceReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)";
-              },
-              onReplacements: () {
-                if (isForMerge) {
-                  return "${e.title} = json['${e.title.toLowerCamelCase()}'] is Map<String, dynamic> ?  ReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,): null";
-                }
-                return "${e.title} = ReplacementsLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)";
-              },
-              onReplacementsList: () {
-                if (isForMerge) {
-                  return "${e.title} = json['${e.title.toLowerCamelCase()}'] is Map<String, dynamic> ?  ReplacementsListLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,): null";
-                }
-                return "${e.title} = ReplacementsListLocalizations.fromJson(json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)";
-              },
-              onList: () {
-                if (isForMerge) {
-                  return "${e.title} = (json['${e.title.toLowerCamelCase()}'] as List<dynamic>?)?.map((e) => e as String).toList()";
-                }
-                return "${e.title} = (json['${e.title.toLowerCamelCase()}'] as List<dynamic>).map((e) => e as String).toList()";
-              },
-            );
-          },
+          return e.type.resolve(
+            onSimple: () =>
+                "${e.key} = json['${e.key.toLowerCamelCase()}'] as ${isForMerge ? 'String?' : 'String'}",
+            onMultiChoice: () {
+              if (isForMerge) {
+                return "${e.key} = json['${e.key.toLowerCamelCase()}'] is Map<String, dynamic> ? MultiChoiceLocalizations.fromJson(json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>) : null";
+              }
+              return "${e.key} = MultiChoiceLocalizations.fromJson(json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>)";
+            },
+            onMultiChoiceReplacements: () {
+              if (isForMerge) {
+                return "${e.key} = json['${e.key.toLowerCamelCase()}'] is Map<String, dynamic> ? MultiChoiceReplacementsLocalizations.fromJson(json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>) : null";
+              }
+              return "${e.key} = MultiChoiceReplacementsLocalizations.fromJson(json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>)";
+            },
+            onReplacements: () {
+              if (isForMerge) {
+                return "${e.key} = json['${e.key.toLowerCamelCase()}'] is Map<String, dynamic> ? ReplacementsLocalizations.fromJson(json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>) : null";
+              }
+              return "${e.key} = ReplacementsLocalizations.fromJson(json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>)";
+            },
+            onReplacementsList: () {
+              if (isForMerge) {
+                return "${e.key} = json['${e.key.toLowerCamelCase()}'] is Map<String, dynamic> ? ReplacementsListLocalizations.fromJson(json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>) : null";
+              }
+              return "${e.key} = ReplacementsListLocalizations.fromJson(json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>)";
+            },
+            onList: () {
+              if (isForMerge) {
+                return "${e.key} = (json['${e.key.toLowerCamelCase()}'] as List<dynamic>?)?.map((e) => e as String).toList()";
+              }
+              return "${e.key} = (json['${e.key.toLowerCamelCase()}'] as List<dynamic>).map((e) => e as String).toList()";
+            },
+          );
+        },
         ArbObjectCreation() => () {
-            if (isForMerge) {
-              return "${e.title.toLowerCamelCase()} = json['${e.title.toLowerCamelCase()}'] is Map<String, dynamic> ?  ${e.title}(json: json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,): null";
-            }
-            return "${e.title.toLowerCamelCase()} = ${e.title}(json: json['${e.title.toLowerCamelCase()}'] as Map<String, dynamic>,)";
-          },
+          if (isForMerge) {
+            return "${e.key} = json['${e.key.toLowerCamelCase()}'] is Map<String, dynamic> ? ${e.className}(json: json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>) : null";
+          }
+          return "${e.key} = ${e.className}(json: json['${e.key.toLowerCamelCase()}'] as Map<String, dynamic>)";
+        },
       }();
     }).toList();
 
-    StringBuffer buffer =
-        StringBuffer("required Map<String, dynamic> json}): _json=json,");
-    for (var i = 0; i < instantiations.length; i++) {
-      final instance = instantiations[i];
-      buffer.write(instance);
-      if (i != instantiations.length - 1) {
-        buffer.write(',');
-      }
-    }
-    buffer.writeln(";");
-    return buffer.toString();
+    final initializers = <String>[
+      if (includeJsonField) '_json = json',
+      ...instantiations,
+    ];
+    return ': ${initializers.join(',\n')};';
   }
 
-  String finalFields({required bool isForMerge}) {
-    return "${map(
-      (e) {
-        return switch (e) {
-          ArbRefCreation() => () => "final ${e.type.resolve(
-                onSimple: () => "String",
-                onMultiChoice: () => "MultiChoiceLocalizations",
-                onMultiChoiceReplacements: () =>
-                    "MultiChoiceReplacementsLocalizations",
-                onReplacements: () => "ReplacementsLocalizations",
-                onReplacementsList: () => 'ReplacementsListLocalizations',
-                onList: () => 'List<String>',
-              )}${isForMerge ? "?" : ""} ${e.title}",
-          ArbObjectCreation() => () =>
-              "final ${e.title}${isForMerge ? "?" : ""} ${e.title.toLowerCamelCase()}",
-        }();
-      },
-    ).join(";\n")};\n final Map<String, dynamic> _json;";
-  }
+  String finalFields({required bool isForMerge, bool includeJsonField = true}) {
+    final declarations = map((e) {
+      final nullable = isForMerge ? '?' : '';
+      return switch (e) {
+        ArbRefCreation() =>
+          () =>
+              'final ${e.type.resolve(onSimple: () => 'String', onMultiChoice: () => 'MultiChoiceLocalizations', onMultiChoiceReplacements: () => 'MultiChoiceReplacementsLocalizations', onReplacements: () => 'ReplacementsLocalizations', onReplacementsList: () => 'ReplacementsListLocalizations', onList: () => 'List<String>')}$nullable ${e.key}',
+        ArbObjectCreation() => () => 'final ${e.className}$nullable ${e.key}',
+      }();
+    }).join(';\n');
 
-  String mergeFields() {
-    return map(
-      (e) =>
-          "${e.title.toLowerCamelCase()} : merge.${e.title.toLowerCamelCase()} ?? ${e.title.toLowerCamelCase()}",
-    ).join(",\n");
+    return '$declarations;\n'
+        '${includeJsonField ? 'final Map<String, dynamic> _json;' : ''}';
   }
 
   Future<void> classGeneration(String generatorPath, String fatherName) async {
-    final classDir =
-        await directoryCreation('$generatorPath/${fatherName}_divisions');
+    final classDir = await directoryCreation(
+      '$generatorPath/${fatherName}_divisions',
+    );
 
     await Future.wait(
-      whereType<ArbObjectCreation>().map(
-        (e) async {
-          final title = e.title;
+      whereType<ArbObjectCreation>().map((e) async {
+        final className = e.className;
 
-          final fileName =
-              "${classDir.path}/${(title.toSnakeCase() ?? 'empty')}";
-          const isForMerge = false;
+        final fileName =
+            '${classDir.path}/${className.toSnakeCase() ?? 'empty'}';
+        const isForMerge = false;
 
-          final classContent = """
+        final classContent =
+            '''
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// *****************************************************
+//  Cool Localization
+// *****************************************************
+
+// coverage:ignore-file
+
 import 'package:coollocalizations/coollocalizations.dart';
-  final class $title{
-    $title({
-    ${e.fields.requiredFields(isForMerge).replaceFirst("_json=json,", '')}
-    ${e.fields.finalFields(isForMerge: isForMerge).replaceFirst("final Map<String, dynamic> _json;", '')}
 
-  }
-""";
-          final file = File("$fileName.dart");
-          await file.writeAsString(classContent);
-          return file;
-        },
-      ),
+final class $className {
+  new({required Map<String, dynamic> json})${e.fields.requiredFields(isForMerge: isForMerge, includeJsonField: false)}
+
+  ${e.fields.finalFields(isForMerge: isForMerge, includeJsonField: false).trim()}
+}
+''';
+        final file = File('$fileName.dart');
+        await writeFileEnsuringDirectory(file, classContent);
+        return file;
+      }),
     );
   }
 
   Future<Directory> directoryCreation(String path) async {
-    final Directory dir = Directory(path);
-    final bool dirExist = await dir.exists();
-
-    if (dirExist) {
+    final dir = Directory(path);
+    if (await dir.exists()) {
       return dir;
     }
-    try {
-      await dir.create();
-      return dir;
-    } catch (e) {
-      rethrow;
-    }
+    await dir.create();
+    return dir;
   }
 }

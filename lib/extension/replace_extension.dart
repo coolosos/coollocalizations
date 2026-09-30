@@ -2,18 +2,14 @@ import 'package:intl/intl.dart';
 
 extension ReplaceInternalization on String {
   String substitute(Map<String, String> substitutionMap) {
-    RegExp regexSubstituteWords = RegExp(
-      "(${substitutionMap.keys.join("|")})",
+    final regexSubstituteWords = RegExp(
+      '(${substitutionMap.keys.join('|')})',
       caseSensitive: false,
     );
 
     return replaceAllMapped(
       regexSubstituteWords,
-      (match) {
-        final newWorld = substitutionMap[match[0]];
-
-        return newWorld ?? '';
-      },
+      (match) => substitutionMap[match[0]] ?? '',
     );
   }
 }
@@ -23,15 +19,16 @@ extension SubstitutionFormatDateTime on Map<String, dynamic> {
     Map<String, String>? dateTimeReplacements, {
     required String? locale,
   }) {
-    final List<_DateTimeReplacements> dateTimesSubstitution = [];
-    final iterableSubstitutions = Map.from(this);
-    for (var element in iterableSubstitutions.entries) {
-      final String? dateFormat = dateTimeReplacements?[element.key];
-      if (element.value is DateTime && dateFormat != null) {
+    final dateTimesSubstitution = <_DateTimeReplacements>[];
+    final iterableSubstitutions = Map<String, dynamic>.from(this);
+    for (final element in iterableSubstitutions.entries) {
+      final dateFormat = dateTimeReplacements?[element.key];
+      final value = element.value;
+      if (value is DateTime && dateFormat != null) {
         dateTimesSubstitution.add(
           _DateTimeReplacements(
             key: element.key,
-            time: element.value,
+            time: value,
             format: dateFormat,
             locale: locale,
           ),
@@ -39,21 +36,19 @@ extension SubstitutionFormatDateTime on Map<String, dynamic> {
         remove(element.key);
       }
     }
-    final Iterable<Map<String, String>> transformations =
-        dateTimesSubstitution.map((e) => e.transform());
-    final Map<String, String> dateTimeTransformations = {};
-    for (Map<String, String> element in transformations) {
-      dateTimeTransformations.addAll(element);
-    }
+    final dateTimeTransformations = <String, String>{
+      for (final replacement in dateTimesSubstitution)
+        ...replacement.transform(),
+    };
     return {
-      ...this,
+      for (final entry in entries) entry.key: entry.value.toString(),
       ...dateTimeTransformations,
     };
   }
 }
 
 final class _DateTimeReplacements {
-  const _DateTimeReplacements({
+  const new({
     required this.key,
     required this.time,
     required this.format,

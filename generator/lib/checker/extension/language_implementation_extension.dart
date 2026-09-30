@@ -1,27 +1,28 @@
-import 'dart:convert';
 import 'dart:io';
 
-extension SchemaKey on File {
-  Future<List<Map<String, dynamic>>> get getLanguages async {
-    try {
-      final String search = await readAsString();
-      final Map<String, dynamic> searchJson = json.decode(search);
-      final List<dynamic> languageList = searchJson['localizations'];
+import '../../utilities/json_decoder.dart';
 
-      if (languageList.every(
-        (element) => element is Map<String, dynamic>,
-      )) {
-        return languageList.cast<Map<String, dynamic>>();
-      }
-      throw Exception();
-    } catch (e) {
-      final String search = await readAsString();
-      final Map<String, dynamic> searchJson = json.decode(search);
-      throw Exception(
-        "File it's not as example_array_localizations in json_schema\n${(searchJson['localizations'] as List<dynamic>).every(
-          (element) => element is Map<String, dynamic>,
-        )}",
+extension SchemaLocales on File {
+  Future<List<Map<String, dynamic>>> get getLanguages async {
+    final errorMessage =
+        "File $path it's not an array_localizations json schema";
+
+    final search = await readAsString();
+    final List<Object?> languageList;
+    try {
+      final searchJson = decodeJsonMap(search, context: 'search file');
+      languageList = asJsonList(
+        searchJson['localizations'],
+        context: 'search file localizations',
       );
+    } on FormatException catch (error) {
+      throw Exception('$errorMessage: $error');
     }
+
+    final languages = languageList.whereType<Map<String, dynamic>>().toList();
+    if (languages.length != languageList.length) {
+      throw Exception(errorMessage);
+    }
+    return languages;
   }
 }

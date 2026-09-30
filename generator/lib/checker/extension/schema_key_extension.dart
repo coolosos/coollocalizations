@@ -1,16 +1,20 @@
-import 'dart:convert';
 import 'dart:io';
 
-extension SchemaKey on File {
+import '../../utilities/json_decoder.dart';
+
+extension SchemaKeys on File {
   Future<Set<String>> get getSchemaKeysFromProperties async {
+    final schema = await readAsString();
     try {
-      final String schema = await readAsString();
-      final Map<String, dynamic> schemaJson = json.decode(schema);
-      return (schemaJson['properties'] as Map<String, dynamic>).keys.toSet()
-        ..removeWhere((key) => key.contains('@'));
-    } catch (e) {
+      final schemaJson = decodeJsonMap(schema, context: 'arb schema file');
+      final properties = asJsonMap(
+        schemaJson['properties'],
+        context: 'arb schema properties',
+      );
+      return properties.keys.toSet()..removeWhere((key) => key.contains('@'));
+    } on FormatException catch (error) {
       throw Exception(
-        "File it's not as arb_localization in json_schema",
+        "File $path it's not an arb_localization json schema: $error",
       );
     }
   }

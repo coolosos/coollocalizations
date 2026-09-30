@@ -9,29 +9,24 @@ class ArbArguments {
 
   static const modificationSchemaLocation = 'modification-schema';
 
-  final ArgParser parser = ArgParser()
-    ..addOption(
-      schemaKey,
-      abbr: 's',
-      help: 'Schema Json',
-      mandatory: true,
-    )
+  final parser = ArgParser()
+    ..addOption(schemaKey, abbr: 's', help: 'Schema Json', mandatory: true)
     ..addOption(
       copySchemaLocation,
       abbr: 'c',
-      aliases: ["copySchema"],
+      aliases: const ['copySchema'],
       help: 'Copy schema on location',
     )
     ..addOption(
       modificationSchemaLocation,
       abbr: 'm',
       help: 'Modification path name',
-      defaultsTo: "modification_schema.json",
+      defaultsTo: 'modification_schema.json',
     )
     ..addOption(
       nameKey,
       abbr: 'n',
       help: 'Name of the default directory',
-      defaultsTo: "arb_localization",
+      defaultsTo: 'arb_localization',
     );
 }

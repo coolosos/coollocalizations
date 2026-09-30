@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:io';
 
 import '../../utilities/directory_management.dart';
@@ -7,7 +5,7 @@ import '../../utilities/printer_helper.dart';
 import '../extension/schema_key_extension.dart';
 
 final class CheckerNonUsedKeys extends PrinterHelper with DirectoryManagement {
-  CheckerNonUsedKeys({
+  new({
     required this.schemaFile,
     required this.resultFile,
     required this.searchDirectory,
@@ -18,10 +16,12 @@ final class CheckerNonUsedKeys extends PrinterHelper with DirectoryManagement {
   final Directory searchDirectory;
 
   Future<void> run() async {
-    title("Arb Non Used Keys");
+    title('Arb Non Used Keys');
     print(
-      "Reading schema json for obtain all keys"
-          .colorizeMessage(PrinterStringColor.yellow, emoji: "🔛"),
+      'Reading schema json for obtain all keys'.colorizeMessage(
+        PrinterStringColor.yellow,
+        emoji: '🔛',
+      ),
     );
 
     final schemaKeys = await schemaFile.getSchemaKeysFromProperties;
@@ -33,27 +33,35 @@ final class CheckerNonUsedKeys extends PrinterHelper with DirectoryManagement {
 
     if (schemaKeys.isEmpty) {
       print(
-        "All key are used"
-            .colorizeMessage(PrinterStringColor.green, emoji: "✅"),
+        'All keys are used'.colorizeMessage(
+          PrinterStringColor.green,
+          emoji: '✅',
+        ),
       );
       exit(0);
     }
 
     print(
-      "Some keys was unused"
-          .colorizeMessage(PrinterStringColor.red, emoji: "🚨"),
+      'Some keys are unused'.colorizeMessage(
+        PrinterStringColor.red,
+        emoji: '🚨',
+      ),
     );
 
-    resultFile.writeAsStringSync(schemaKeys.toList().join('\n'));
+    await writeFileEnsuringDirectory(resultFile, schemaKeys.join('\n'));
 
     print(
-      "File with duplicate key create"
-          .colorizeMessage(PrinterStringColor.green, emoji: "✅"),
+      'File with unused keys created'.colorizeMessage(
+        PrinterStringColor.green,
+        emoji: '✅',
+      ),
     );
 
     print(
-      "Please review the file ${resultFile.path} "
-          .colorizeMessage(PrinterStringColor.yellow, emoji: "🔛"),
+      'Please review the file ${resultFile.path} '.colorizeMessage(
+        PrinterStringColor.yellow,
+        emoji: '🔛',
+      ),
     );
 
     exit(1);
@@ -65,25 +73,17 @@ final class CheckerNonUsedKeys extends PrinterHelper with DirectoryManagement {
   }) {
     navigation(
       directory: directoryToCheck,
-      navigationPrevent: (element) {
-        return isArbFile(fileToCheck: element);
-      },
+      navigationPrevent: (element) => isArbFile(fileToCheck: element),
       onDirectory: (newDirectory) => _checkIfArbKeyExist(
         directoryToCheck: newDirectory,
         schemaKeys: schemaKeys,
       ),
       onFile: (file) {
-        String fileContent = file.readAsStringSync();
-        final Set<String> fileArbKeyUsed = {};
-        for (String arbKey in schemaKeys) {
-          if (fileContent.contains(".$arbKey")) {
-            fileArbKeyUsed.add(arbKey);
-          }
-        }
-
-        for (String usedKey in fileArbKeyUsed) {
-          schemaKeys.remove(usedKey);
-        }
+        final fileContent = file.readAsStringSync();
+        final fileArbKeyUsed = schemaKeys
+            .where((arbKey) => fileContent.contains('.$arbKey'))
+            .toSet();
+        schemaKeys.removeAll(fileArbKeyUsed);
       },
     );
   }

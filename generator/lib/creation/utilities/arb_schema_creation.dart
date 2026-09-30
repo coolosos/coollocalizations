@@ -1,29 +1,30 @@
+import '../../utilities/json_decoder.dart';
+
 enum ArbObjectType {
   simple,
   multiChoice,
   multiChoiceReplacements,
   replacements,
   replacementsList,
-  list,
-  ;
+  list;
 
-  static ArbObjectType? fromString(String? preType) {
-    if (preType == null || preType.isEmpty) {
+  static ArbObjectType? fromString(Object? preType) {
+    if (preType is! String || preType.isEmpty) {
       return null;
     }
-    if (preType.contains("multiChoiceReplacements")) {
+    if (preType.contains('multiChoiceReplacements')) {
       return multiChoiceReplacements;
     }
-    if (preType.contains("multiChoice")) {
+    if (preType.contains('multiChoice')) {
       return multiChoice;
     }
-    if (preType.contains("replacementList")) {
+    if (preType.contains('replacementList')) {
       return replacementsList;
     }
-    if (preType.contains("simpleList")) {
+    if (preType.contains('simpleList')) {
       return list;
     }
-    if (preType.contains("replacement")) {
+    if (preType.contains('replacement')) {
       return replacements;
     }
     return simple;
@@ -49,44 +50,55 @@ enum ArbObjectType {
 }
 
 final class ArbRefCreation extends ArbSchemaCreation {
-  ArbRefCreation({required super.title, required this.type});
+  const new({required super.key, required this.type});
 
   final ArbObjectType type;
 }
 
 final class ArbObjectCreation extends ArbSchemaCreation {
-  const ArbObjectCreation({
-    required super.title,
+  const new({
+    required super.key,
+    required this.className,
     required this.fields,
   });
+
+  /// Nombre de la clase Dart generada, tomado del `name` del schema.
+  final String className;
 
   final List<ArbSchemaCreation> fields;
 }
 
 sealed class ArbSchemaCreation {
-  const ArbSchemaCreation({required this.title});
+  const new({required this.key});
 
   static ArbSchemaCreation? fromMapEntry(MapEntry<String, dynamic> entry) {
-    final valueMap = (entry.value as Map<String, dynamic>);
-    if (ArbObjectType.fromString(valueMap["\$ref"] as String?)
-        case final type?) {
-      final String title = entry.key;
-      return ArbRefCreation(title: title, type: type);
+    final valueMap = asJsonMap(
+      entry.value,
+      context: 'schema property ${entry.key}',
+    );
+    final type = ArbObjectType.fromString(valueMap[r'$ref']);
+    if (type != null) {
+      return ArbRefCreation(key: entry.key, type: type);
     }
 
-    if (valueMap["properties"] case final properties?
-        when properties is Map<String, dynamic>) {
-      final String className = valueMap["name"];
-      final List<ArbSchemaCreation> fields = [];
-      for (var schema in properties.entries) {
+    final properties = valueMap['properties'];
+    final className = valueMap['name'];
+    if (properties is Map<String, dynamic> && className is String) {
+      final fields = <ArbSchemaCreation>[];
+      for (final schema in properties.entries) {
         if (ArbSchemaCreation.fromMapEntry(schema) case final field?) {
           fields.add(field);
         }
       }
-      return ArbObjectCreation(title: className, fields: fields);
+      return ArbObjectCreation(
+        key: entry.key,
+        className: className,
+        fields: fields,
+      );
     }
     return null;
   }
 
-  final String title;
+  /// Clave del schema, que es tambien la clave del campo en el arb.
+  final String key;
 }

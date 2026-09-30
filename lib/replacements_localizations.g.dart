@@ -7,18 +7,16 @@ part of 'replacements_localizations.dart';
 // **************************************************************************
 
 ReplacementsLocalizations _$ReplacementsLocalizationsFromJson(
-        Map<String, dynamic> json) =>
-    ReplacementsLocalizations(
-      value: json['value'] as String,
-      dateTimeReplacements:
-          (json['dateTimeReplacements'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, e as String),
-      ),
-    );
+  Map<String, dynamic> json,
+) => ReplacementsLocalizations(
+  value: json['value'] as String,
+  dateTimeReplacements: (json['dateTimeReplacements'] as Map<String, dynamic>?)
+      ?.map((k, e) => MapEntry(k, e as String)),
+);
 
 Map<String, dynamic> _$ReplacementsLocalizationsToJson(
-        ReplacementsLocalizations instance) =>
-    <String, dynamic>{
-      'value': instance.value,
-      'dateTimeReplacements': instance.dateTimeReplacements,
-    };
+  ReplacementsLocalizations instance,
+) => <String, dynamic>{
+  'value': instance.value,
+  'dateTimeReplacements': instance.dateTimeReplacements,
+};
