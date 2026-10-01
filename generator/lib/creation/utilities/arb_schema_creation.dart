@@ -1,6 +1,6 @@
 import '../../utilities/json_decoder.dart';
 
-/// Añade el sufijo `?` que llevan los tipos de la variante de merge.
+/// Appends the `?` suffix that the types of the merge variant carry.
 String _nullableType(String type, bool isForMerge) =>
     isForMerge ? '$type?' : type;
 
@@ -34,7 +34,7 @@ enum ArbObjectType {
     return simple;
   }
 
-  /// Tipo Dart al que apunta una referencia de este tipo, sin nullabilidad.
+  /// Dart type a reference of this type points to, without nullability.
   String get dartTypeName => switch (this) {
     ArbObjectType.simple => 'String',
     ArbObjectType.multiChoice => 'MultiChoiceLocalizations',
@@ -49,7 +49,7 @@ enum ArbObjectType {
 final class ArbRefCreation extends ArbSchemaCreation {
   const new({required super.key, required this.type});
 
-  /// Tipo al que apunta la propiedad del schema.
+  /// Type the schema property points to.
   final ArbObjectType type;
 
   @override
@@ -64,10 +64,10 @@ final class ArbObjectCreation extends ArbSchemaCreation {
     required this.fields,
   });
 
-  /// Nombre de la clase Dart generada, tomado del `name` del schema.
+  /// Name of the generated Dart class, taken from the schema `name`.
   final String className;
 
-  /// Propiedades del objeto, que se emiten en su propia clase de división.
+  /// Properties of the object, which are emitted in their own division class.
   final List<ArbSchemaCreation> fields;
 
   @override
@@ -78,12 +78,12 @@ final class ArbObjectCreation extends ArbSchemaCreation {
 sealed class ArbSchemaCreation {
   const new({required this.key});
 
-  /// Tipo con el que se declara la propiedad en la clase generada.
+  /// Type the property is declared with in the generated class.
   String dartType({required bool isForMerge});
 
-  /// Parsea una única entrada de propiedades del schema.
+  /// Parses a single properties entry of the schema.
   ///
-  /// Lanza [FormatException] si la entrada no es soportada.
+  /// Throws [FormatException] if the entry is not supported.
   static ArbSchemaCreation fromMapEntry(MapEntry<String, dynamic> entry) {
     final valueMap = asJsonMap(
       entry.value,
@@ -113,8 +113,8 @@ sealed class ArbSchemaCreation {
     );
   }
 
-  /// Parsea todas las [entries] de `properties`. Falla si alguna no es
-  /// soportada, listando todas las claves ofensoras en un único error.
+  /// Parses every [entries] of `properties`. Fails if any of them is not
+  /// supported, listing all the offending keys in a single error.
   static List<ArbSchemaCreation> fromMapEntries(
     List<MapEntry<String, dynamic>> entries,
   ) {
@@ -136,6 +136,6 @@ sealed class ArbSchemaCreation {
     return schemas;
   }
 
-  /// Clave del schema, que es tambien la clave del campo en el arb.
+  /// Schema key, which is also the field key in the arb.
   final String key;
 }
