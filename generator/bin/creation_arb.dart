@@ -23,7 +23,7 @@ Future<void> main(List<String> arguments) async {
       p.canonicalize(p.absolute(readStringArg(result, ArbArguments.schemaKey))),
     );
 
-    final generatorAwaitList = <Future<void>>[];
+    final generatorList = <Future<void> Function()>[];
 
     final className = readStringArg(result, ArbArguments.nameKey);
 
@@ -33,7 +33,7 @@ Future<void> main(List<String> arguments) async {
       isForMerge: false,
     );
 
-    generatorAwaitList.add(arbGenerator.run());
+    generatorList.add(arbGenerator.run);
 
     final arbRemoteGenerator = ArbClassGenerateBySchema(
       schemaFile: schemaFile,
@@ -41,7 +41,7 @@ Future<void> main(List<String> arguments) async {
       isForMerge: true,
     );
 
-    generatorAwaitList.add(arbRemoteGenerator.run());
+    generatorList.add(arbRemoteGenerator.run);
 
     final schemaUpdater = SchemaUpdater(schemaFile: schemaFile);
 
@@ -56,12 +56,13 @@ Future<void> main(List<String> arguments) async {
       ArbArguments.copySchemaLocation,
     );
     if (newSchemaLocation != null && newSchemaLocation.isNotEmpty) {
-      generatorAwaitList.add(
-        schemaUpdater.copySchemaOnLocation(copyLocation: newSchemaLocation),
+      generatorList.add(
+        () =>
+            schemaUpdater.copySchemaOnLocation(copyLocation: newSchemaLocation),
       );
     }
 
-    await Future.wait(generatorAwaitList);
+    await Future.wait(generatorList.map((generator) => generator()));
   } catch (e) {
     PrinterHelper().topDivider();
     print(

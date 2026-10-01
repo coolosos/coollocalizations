@@ -81,7 +81,10 @@ sealed class ArbSchemaCreation {
   /// Tipo con el que se declara la propiedad en la clase generada.
   String dartType({required bool isForMerge});
 
-  static ArbSchemaCreation? fromMapEntry(MapEntry<String, dynamic> entry) {
+  /// Parsea una única entrada de propiedades del schema.
+  ///
+  /// Lanza [FormatException] si la entrada no es soportada.
+  static ArbSchemaCreation fromMapEntry(MapEntry<String, dynamic> entry) {
     final valueMap = asJsonMap(
       entry.value,
       context: 'schema property ${entry.key}',
@@ -94,19 +97,43 @@ sealed class ArbSchemaCreation {
     final properties = valueMap['properties'];
     final className = valueMap['name'];
     if (properties is Map<String, dynamic> && className is String) {
-      final fields = <ArbSchemaCreation>[];
-      for (final schema in properties.entries) {
-        if (ArbSchemaCreation.fromMapEntry(schema) case final field?) {
-          fields.add(field);
-        }
-      }
+      final fields = ArbSchemaCreation.fromMapEntries(
+        properties.entries.toList(),
+      );
       return ArbObjectCreation(
         key: entry.key,
         className: className,
         fields: fields,
       );
     }
-    return null;
+    throw FormatException(
+      r'Expected a "$ref" to arb_instances.json or a "name" + "properties" '
+      'object in schema property ${entry.key}',
+      valueMap,
+    );
+  }
+
+  /// Parsea todas las [entries] de `properties`. Falla si alguna no es
+  /// soportada, listando todas las claves ofensoras en un único error.
+  static List<ArbSchemaCreation> fromMapEntries(
+    List<MapEntry<String, dynamic>> entries,
+  ) {
+    final schemas = <ArbSchemaCreation>[];
+    final unsupported = <String>[];
+    for (final entry in entries) {
+      try {
+        schemas.add(ArbSchemaCreation.fromMapEntry(entry));
+      } on FormatException catch (error) {
+        unsupported.add(error.message);
+      }
+    }
+    if (unsupported.isNotEmpty) {
+      throw FormatException(
+        'Unsupported schema properties:\n'
+        '${unsupported.map((e) => '  - $e').join('\n')}',
+      );
+    }
+    return schemas;
   }
 
   /// Clave del schema, que es tambien la clave del campo en el arb.

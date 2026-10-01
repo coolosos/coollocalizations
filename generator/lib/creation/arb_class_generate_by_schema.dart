@@ -19,9 +19,6 @@ const _fileHeader = '''
 // coverage:ignore-file
 ''';
 
-/// Construye [className] desde el mapa anidado en [entry] con su factory
-/// `fromJson`. En merge la clave puede no venir en el arb, asi que el valor
-/// solo se construye cuando el mapa esta presente.
 String _fromJsonOf(String className, String entry, bool isForMerge) =>
     isForMerge
     ? '$entry is Map<String, dynamic>\n'
@@ -29,8 +26,6 @@ String _fromJsonOf(String className, String entry, bool isForMerge) =>
           '    : null'
     : '$className.fromJson($entry as Map<String, dynamic>)';
 
-/// Igual que [_fromJsonOf] pero para las divisiones, cuyo constructor recibe el
-/// mapa en un parametro `json` en lugar de exponer un `fromJson`.
 String _divisionOf(String className, String entry, bool isForMerge) =>
     isForMerge
     ? '$entry is Map<String, dynamic>\n'
@@ -49,7 +44,6 @@ final class ArbClassGenerateBySchema with PrinterHelper, DirectoryManagement {
   final File resultFile;
   final bool isForMerge;
 
-  /// Nombre de la clase que agrupa las localizaciones del arb.
   String get _localizationClassName =>
       isForMerge ? 'LanguageLocalizationMerge' : 'LanguageLocalization';
 
@@ -89,13 +83,9 @@ final class ArbClassGenerateBySchema with PrinterHelper, DirectoryManagement {
       schemaJson['properties'],
       context: 'schema properties',
     );
-    return properties.entries
-        .map(ArbSchemaCreation.fromMapEntry)
-        .nonNulls
-        .toList();
+    return ArbSchemaCreation.fromMapEntries(properties.entries.toList());
   }
 
-  /// Contenido del fichero con la clase de localizaciones y su interfaz.
   String _localizationFile(
     ArbNameCase fileNameCases,
     List<ArbSchemaCreation> schemas,
@@ -146,7 +136,6 @@ class $className {
     ].join();
   }
 
-  /// Bloque de imports y exports, con una linea en blanco entre cada grupo.
   String _imports(ArbNameCase fileNameCases, List<ArbSchemaCreation> schemas) {
     final divisions = schemas.importDivisions(
       fileNameCases.name.replaceFirst('_merge', ''),
@@ -168,7 +157,6 @@ class $className {
     ].join('\n');
   }
 
-  /// Escribe una clase por cada division del schema.
   Future<void> _writeDivisions(
     ArbNameCase fileNameCases,
     List<ArbSchemaCreation> schemas,
@@ -224,10 +212,6 @@ extension SchemasToDart on List<ArbSchemaCreation> {
       .toList()
       .sorted();
 
-  /// Emite un getter por propiedad en lugar de un campo final inicializado en el
-  /// constructor. Dejar el constructor en una sola asignacion es lo que evita
-  /// que dart2wasm compile la inicializacion en una funcion mayor que el limite
-  /// de tamano por funcion de WebAssembly.
   String getters({required bool isForMerge}) {
     final members = map((schema) {
       final name = schema.key;
@@ -265,8 +249,6 @@ extension SchemasToDart on List<ArbSchemaCreation> {
         ArbObjectCreation() => _divisionOf(schema.className, entry, isForMerge),
       };
 
-      // Los cuerpos con ternario, que solo aparecen en merge, se emiten
-      // partidos en lineas para no depender de un dart format posterior.
       return body.contains('\n')
           ? '$type get $name =>\n    $body;'
           : '$type get $name => $body;';
