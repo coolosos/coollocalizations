@@ -16,27 +16,28 @@ abstract interface class ArbLocalizationsMerge {
 }
 
 class LanguageLocalizationMerge {
-  new({required Map<String, dynamic> json})
-    : _json = json,
-      locale = json['locale'] as String?,
-      homeWelcomeMessage = json['homeWelcomeMessage'] is Map<String, dynamic>
-          ? MultiChoiceReplacementsLocalizations.fromJson(
-              json['homeWelcomeMessage'] as Map<String, dynamic>,
-            )
-          : null,
-      landingPackHelpTitle = json['landingPackHelpTitle'] as String?,
-      loginL10n = json['loginL10n'] is Map<String, dynamic>
-          ? LoginLocalizationArb(
-              json: json['loginL10n'] as Map<String, dynamic>,
-            )
-          : null;
+  new({required this._json});
+
   factory fromJson(Map<String, dynamic> json) =>
       LanguageLocalizationMerge(json: json);
 
-  final String? locale;
-  final MultiChoiceReplacementsLocalizations? homeWelcomeMessage;
-  final String? landingPackHelpTitle;
-  final LoginLocalizationArb? loginL10n;
   final Map<String, dynamic> _json;
+
   Map<String, dynamic> get jsonMerge => _json;
+
+  String? get locale => _json['locale'] as String?;
+
+  MultiChoiceReplacementsLocalizations? get homeWelcomeMessage =>
+      _json['homeWelcomeMessage'] is Map<String, dynamic>
+      ? MultiChoiceReplacementsLocalizations.fromJson(
+          _json['homeWelcomeMessage'] as Map<String, dynamic>,
+        )
+      : null;
+
+  String? get landingPackHelpTitle => _json['landingPackHelpTitle'] as String?;
+
+  LoginLocalizationArb? get loginL10n =>
+      _json['loginL10n'] is Map<String, dynamic>
+      ? LoginLocalizationArb(json: _json['loginL10n'] as Map<String, dynamic>)
+      : null;
 }

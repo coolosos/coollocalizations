@@ -82,16 +82,15 @@ dart run generator/bin/creation_arb.dart  -s ./example/lib/generators/language_l
 | `-m` | **Output path** for the generated modification schema file (`modification_schema.json`). |
 | `-c` | Optional directory where the resulting schema is copied as `localization_schema.json`. The directory is created if missing. |
 
-### 2. Run Code Generation (JsonSerializable)
+### 2. (No build step required)
 
-After executing the creation script, you must generate the boilerplate code for `JsonSerializable` using the Dart build runner:
+The generated classes read the raw JSON through a `Map<String, dynamic>` and
+expose typed getters, so **there is no `.g.dart` boilerplate to generate and no
+need to run `build_runner`**. You can compile right after the creation script.
 
-```bash
-dart run build_runner build
-```
-
-> `build_runner` `^2.16.1` removed the `--delete-conflicting-outputs` flag, so it must not be
-> passed anymore.
+> Releases before `0.3.4` emitted `@JsonSerializable` classes and required
+> `dart run build_runner build`. See
+> [Version history](#-version-history) if you are pinned to an older tag.
 
 ### 3. Generated Artifacts
 
@@ -197,7 +196,10 @@ To use these scripts in your Dart or Flutter project, you must first add the nec
 
 ### 1. Add Dependencies to `pubspec.yaml`
 
-Include the following dependencies under the `dependencies` and `dev_dependencies` section. This configures the project to use `build_runner` and fetches the `coollocalizations_generator` package directly from the Git repository.
+The library and the generator live in the same repository, but they are two
+separate packages, so each one gets its own `git` entry. Note that
+`coollocalizations_generator` needs the `path: generator` to point at the
+sub-package.
 
 ```yaml
 environment:
@@ -207,23 +209,34 @@ dependencies:
   coollocalizations: # Brings you the generated classes that you will need in your Dart/Flutter project
     git:
       url: git@github.com:coolosos/coollocalizations.git
-      ref: latest # Use 'latest' or a specific commit/branch
+      ref: 0.3.3 # Use a release tag, 'latest', or a specific commit/branch
 
 dev_dependencies:
-  build_runner: ^2.16.1 # Required for code generation like JsonSerializable
-  json_serializable: ^6.14.1 # Required for code generation
   coollocalizations_generator:
     git:
       url: git@github.com:coolosos/coollocalizations.git
       path: generator
-      ref: latest # Use 'latest' or a specific commit/branch
+      ref: 0.3.3 # Keep this in sync with the ref above
 ```
 
 After modifying the file, run `dart pub get` (or `flutter pub get`) in your terminal.
 
+> **Keep both refs on the same release.** The generated code and the runtime
+> library must agree: the generator emits classes that call the `fromJson`
+> constructors defined in `coollocalizations`. Pinning the two to different
+> releases is the most likely cause of a compile error right after generation.
+>
+> `build_runner` and `json_serializable` are **not** required for this
+> workflow. They are only needed if you want to rebuild this repository's own
+> library sources, which use `@JsonSerializable`.
+
 ### 2. Execution via Dart Runner
 
-Once the dependency is installed, you can execute the scripts directly using the package name (`coollocalizations_generator`) followed by the specific executable (e.g., `creation_arb` or `merge_arb`).
+Once the dependency is installed, you can execute the scripts directly using the
+package name (`coollocalizations_generator`) followed by the specific executable
+(e.g., `creation_arb` or `merge_arb`). Paths are resolved relative to your
+project root, so `lib/...` is what you type, not
+`../generator/bin/creation_arb.dart`.
 
 | Script Name | Command (Simplified) |
 | :--- | :--- |
@@ -232,7 +245,38 @@ Once the dependency is installed, you can execute the scripts directly using the
 | **Non required check** | `dart run coollocalizations_generator:checker_non_required_arb [options]` |
 | **Non used check** | `dart run coollocalizations_generator:checker_non_used_arb [options]` |
 
-This setup ensures that the scripts are run using the path defined in your project dependencies, simplifying the execution commands compared to using relative paths (`../generator/bin/creation_arb.dart`).
+A full generation run for a consuming project looks like this:
+
+```bash
+# 1. Generate the Dart classes and the two schemas.
+dart run coollocalizations_generator:creation_arb \
+  -s lib/generators/language_localizations.json \
+  -n lib/gen/arb_localization \
+  -m lib/gen/modification_schema.json
+
+# 2. Validate that the schema keys you defined are actually used in code.
+dart run coollocalizations_generator:checker_non_used_arb \
+  -a lib/generators/language_localizations.json \
+  -o lib/checks/non_used \
+  -s lib
+
+# 3. Apply the per-language overrides to produce the final ARB.
+dart run coollocalizations_generator:merge_arb \
+  -a lib/generators/arb.json \
+  -m lib/merge/arb_merge.json \
+  -o lib/merge/arb_after_merge.json \
+  --typology localization
+```
+
+Commit `lib/gen/` (it is generated, but the app compiles against it) and keep
+`lib/merge/arb_merge.json` out of version control, as described in
+[Phase 2](#-phase-2-localization-merging-the-merge-script).
+
+Every script also prints its own usage:
+
+```bash
+dart run coollocalizations_generator:creation_arb help
+```
 
 ### 3. Lint configuration
 
@@ -244,3 +288,21 @@ include: package:coolint/dart.yaml
 
 > The `coollocalizations_generator` package is a CLI, so it disables `avoid_print` in its own
 > `analysis_options.yaml`.
+
+---
+
+## 📌 Version history
+
+`coollocalizations` and `coollocalizations_generator` are released from the same
+repository and are intended to be used at the same release. Pin both `ref`
+values to the same tag.
+
+| Release | Notes |
+| :--- | :--- |
+| `0.3.4` | Generator emits getters over a raw `Map<String, dynamic>` instead of `@JsonSerializable` fields. `build_runner` is no longer needed for the generated output. Using getters keeps each generated member small, which avoids WebAssembly's per-function size limit on apps with many keys. Malformed schema properties now fail loudly instead of being dropped silently. |
+| `0.3.1` | First release of the schema-driven creation script. Output still required `dart run build_runner build`. |
+
+> **Both `ref` values must match.** Earlier releases are still usable together,
+> but mixing them (for example the library at `0.3.3` with the generator at
+> `0.3.1`) produces classes that call constructors the pinned library may not
+> expose.
